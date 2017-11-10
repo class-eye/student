@@ -1,0 +1,7 @@
+mini-caffe
+models
+output
+*.zip
+build
+*.avi
+*.mp4
