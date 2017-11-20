@@ -13,15 +13,27 @@ using namespace std;
 using namespace cv;
 using namespace caffe;
 using namespace fs;
+
+vector<string>output_body;
 int main(){
 	if (caffe::GPUAvailable()) {
 		caffe::SetMode(caffe::GPU, 1);
 	}
 	Net net1("../models/pose_deploy.prototxt");
 	net1.CopyTrainedLayersFrom("../models/pose_iter_440000.caffemodel");
+	
 	/*Net net2("../models/feat.prototxt");
 	net2.CopyTrainedLayersFrom("../models/feat.caffemodel");*/
-	VideoCapture capture("../hiv00043.mp4");
+
+	//for (int i = 0; i <70; i++){
+	//	string output = "../bodydir/body" + to_string(i);
+	//	/*if (!fs::IsExists(output)){
+	//	fs::MakeDir(output);
+	//	}*/
+	//	output_body.push_back(output);
+	//}
+
+	VideoCapture capture("../taolun1.mp4");
 	if (!capture.isOpened())
 	{
 		printf("video loading fail");
@@ -30,16 +42,26 @@ int main(){
 	
 	int n = 0;
 	vector<Student_Info>student_info;
-	/*int frameToStart = 3000;
-	capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);*/
+	int frameToStart = 6750;    //taolun1
+	//int frameToStart = 800;       //taolun2	
+	capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
 	while (true)
 	{
 		if (!capture.read(frame)){
 			break;
 		}
-		cv::resize(frame, frame, Size(0, 0), 2 / 3., 2 / 3.);
-		PoseInfo pose;
-		student_info = student_detect(net1, frame, n, pose);
+		
+		if (n<25*10){
+			cv::resize(frame, frame, Size(0, 0), 2 / 3., 2 / 3.);
+			PoseInfo pose1;
+			GetStandaredFeats(net1, pose1,frame,n);		
+		}	
+
+		else{
+			cv::resize(frame, frame, Size(0, 0), 2 / 3., 2 / 3.);
+			PoseInfo pose;
+			student_info = student_detect(net1, frame, n, pose);
+		}
 		n++;
 	}
 

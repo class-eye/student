@@ -23,7 +23,7 @@ bool greate(vector<float>a, vector<float>b){
 }
 PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	Timer timer;
-	float scale = 1.5*368.0 / oriImg.size[0];
+	float scale = 2.0*368.0 / oriImg.size[0];
 	//float scale = 1.0;
 	Mat imagetotest;
 	cv::resize(oriImg, imagetotest, Size(0, 0), scale, scale);
@@ -89,7 +89,7 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 		}
 		
 		Mat map;
-		GaussianBlur(map_ori, map, Size(7,7),3, 3);
+		GaussianBlur(map_ori, map, Size(11,11),3, 3);
 
 		Mat map_left = Mat::zeros(oriImg.size[0], oriImg.size[1], CV_32F);
 		map.rowRange(0, oriImg.size[0] - 1).copyTo(map_left.rowRange(1, oriImg.size[0]));
