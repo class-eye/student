@@ -7,4 +7,4 @@ include(student/student.cmake)
 
 file(GLOB SRC main/*.h* main/*.c*)
 add_executable(main ${SRC})
-target_link_libraries(main caffe ${OpenCV_LIBS} ${STUDENT_LIBRARY} ${FEATURE_LIBRARY})
+target_link_libraries(main caffe ${OpenCV_LIBS} ${STUDENT_LIBRARY})
