@@ -13,7 +13,8 @@ void Analys_Behavior(vector<vector<Student_Info>>students_all, vector<int>&stude
 
 	string status1 = "raising hand";
 	string status2 = "standing";
-	string status3 = "disscussion";
+	string status3 = "2-students'disscussion";
+	string status3back = "4-students'disscussion";
 	string status4 = "daze";
 	string status5 = "bow head";
 	string status6 = "arm_ver";
@@ -86,8 +87,11 @@ void Analys_Behavior(vector<vector<Student_Info>>students_all, vector<int>&stude
 			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion == true){
 				num_of_disscuss++;
 			}
-			if (num_of_back >= 10 || num_of_disscuss >= 10){
-				class_info.all_disscussion = true;
+			if (num_of_back >= 10){
+				class_info.all_disscussion_4 = true;
+			}
+			else if (num_of_disscuss >= 8){
+				class_info.all_disscussion_2 = true;
 			}
 			//------------------判断低头-----------------------------------
 			int count2 = 0;
@@ -96,7 +100,7 @@ void Analys_Behavior(vector<vector<Student_Info>>students_all, vector<int>&stude
 					if (students_all[student_valid[j]][k].bow_head_tmp == true)count2++;
 				}
 			}
-			if (count2 >= 9)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = true;
+			if (count2 == 10)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = true;
 
 			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
 				num_of_bowhead++;
@@ -121,55 +125,63 @@ void Analys_Behavior(vector<vector<Student_Info>>students_all, vector<int>&stude
 
 			int thre;
 			int cur_y = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y;
-			if (cur_y >= image.size().height / 2)thre = 15;
-			else if (cur_y < image.size().height / 2 && cur_y >= image.size().height / 4)thre = 10;
+			if (cur_y >= image.size().height / 2)thre = 10;
 			else thre = 5;
 
 			//-------------------判断发呆(Ns内)--------------------------
-			if (students_all[student_valid[j]].size() > 30){
-				vector<float>nose_range_x;
-				vector<float>nose_range_y;
-				for (int k = students_all[student_valid[j]].size() - 30; k < students_all[student_valid[j]].size(); k++){
-					nose_range_x.push_back(students_all[student_valid[j]][k].loc.x);
-					nose_range_y.push_back(students_all[student_valid[j]][k].loc.y);
-				}
 
-				float max_nose_x = *max_element(nose_range_x.begin(), nose_range_x.end());
-				float min_nose_x = *min_element(nose_range_x.begin(), nose_range_x.end());
-				float max_nose_y = *max_element(nose_range_y.begin(), nose_range_y.end());
-				float min_nose_y = *min_element(nose_range_y.begin(), nose_range_y.end());
-				if (abs(nose_range_x[nose_range_x.size() - 1] - max_nose_x) < thre && abs(nose_range_x[nose_range_x.size() - 1] - min_nose_x) < thre && abs(nose_range_y[nose_range_y.size() - 1] - max_nose_y) < thre && abs(nose_range_y[nose_range_y.size() - 1] - min_nose_y) < thre){
-					students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze = true;
+			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
+				students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze = false;
+			}
+			else {
+				if (students_all[student_valid[j]].size() > 30){
+					vector<float>nose_range_x;
+					vector<float>nose_range_y;
+					for (int k = students_all[student_valid[j]].size() - 30; k < students_all[student_valid[j]].size(); k++){
+						nose_range_x.push_back(students_all[student_valid[j]][k].loc.x);
+						nose_range_y.push_back(students_all[student_valid[j]][k].loc.y);
+					}
+
+					float max_nose_x = *max_element(nose_range_x.begin(), nose_range_x.end());
+					float min_nose_x = *min_element(nose_range_x.begin(), nose_range_x.end());
+					float max_nose_y = *max_element(nose_range_y.begin(), nose_range_y.end());
+					float min_nose_y = *min_element(nose_range_y.begin(), nose_range_y.end());
+					if (abs(nose_range_x[nose_range_x.size() - 1] - max_nose_x) < thre && abs(nose_range_x[nose_range_x.size() - 1] - min_nose_x) < thre && abs(nose_range_y[nose_range_y.size() - 1] - max_nose_y) < thre && abs(nose_range_y[nose_range_y.size() - 1] - min_nose_y) < thre){
+						students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze = true;
+					}
 				}
 			}
 		}
 
 		//----------------如果讨论--------------------------
-		if (class_info.all_disscussion == true){
-			cv::putText(image, status3, cv::Point2f(image.size[1] / 2, image.size[0] / 2), FONT_HERSHEY_DUPLEX, 1, Scalar(0, 255, 255), 1);
+		if (class_info.all_disscussion_2 == true){
+			cv::putText(image, status3, cv::Point2f(image.size[1] / 2, image.size[0] / 2), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 255), 1);
 		}
-		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion == true){
+		if (class_info.all_disscussion_4 == true){
+			cv::putText(image, status3back, cv::Point2f(image.size[1] / 2, image.size[0] / 2), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 255), 1);
+		}
+		/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion == true){
 			cv::putText(image, status3, cv::Point2f(x1, y1), FONT_HERSHEY_DUPLEX, 0.5, Scalar(0, 255, 255), 1);
-		}
+		}*/
 
 		//----------------如果发呆----------------------------
 		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze == true){
-			cv::putText(image, status4, cv::Point2f(x1 + 10, y1 + 10), FONT_HERSHEY_DUPLEX, 0.5, Scalar(209, 206, 0), 1);
+			cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1);
 		}
 		//---------------如果起立-----------------------------
 		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
-			cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_DUPLEX, 0.5, Scalar(255, 102, 224), 1);
+			cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0,255,255), 1);
 		}
 		//----------------如果低头----------------------------
 		if (class_info.all_bow_head == true){
-			cv::putText(image, status5, cv::Point2f(image.size[1] / 2, image.size[0] / 2), FONT_HERSHEY_DUPLEX, 1, Scalar(0, 255, 255), 1);
+			cv::putText(image, status5, cv::Point2f(image.size[1] / 2, image.size[0] / 2 - 50), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 255), 1);
 		}
 		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
-			cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_DUPLEX, 0.5, Scalar(255, 191, 0), 1);
+			cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 0, 255), 1);
 		}
 		//-----------------如果举手-----------------------------
 		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
-			cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_DUPLEX, 0.5, Scalar(0, 0, 139), 1);
+			cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 0, 139), 1);
 		}
 	}
 	char buff[100];

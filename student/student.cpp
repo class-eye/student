@@ -301,7 +301,7 @@ std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Ma
 		Analys_Behavior(students_all, student_valid, class_info, image);
 		string output1;
 		if (class_info.all_bow_head || class_info.all_disscussion_2 || class_info.all_disscussion_4){
-			output1 = output + "/" + "***-" + to_string(n) + ".jpg";
+			output1 = output + "/" + "class__" + to_string(n) + ".jpg";
 		}
 		else{
 			output1 = output + "/" + to_string(n) + ".jpg";
