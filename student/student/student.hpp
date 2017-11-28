@@ -10,12 +10,13 @@ using namespace cv;
 using namespace caffe;
 struct Class_Info{
 	bool all_bow_head=false;
-	bool all_disscussion = false;
+	bool all_disscussion_2 = false;
+	bool all_disscussion_4 = false;
 };
 struct Student_Info{
 	bool raising_hand=false;
 	bool standing=false;
-	bool disscussion = false;
+	bool disscussion= false;
 	bool daze = false;
 	bool bow_head = false;
 
@@ -31,7 +32,7 @@ struct Student_Info{
 	bool front=false;
 	bool back = false;
 };
-extern vector<string>output_body;
-vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose);
-void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n);
+//vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
+std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output);
+void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &output);
 #endif

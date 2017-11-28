@@ -9,6 +9,7 @@
 #include <caffe/caffe.hpp>
 #include <thread>
 #include "student/student.hpp"
+#include "student/functions.hpp"
 using namespace std;
 using namespace cv;
 using namespace caffe;
@@ -17,7 +18,7 @@ using namespace fs;
 vector<string>output_body;
 int main(){
 	if (caffe::GPUAvailable()) {
-		caffe::SetMode(caffe::GPU, 1);
+		caffe::SetMode(caffe::GPU, 0);
 	}
 	Net net1("../models/pose_deploy.prototxt");
 	net1.CopyTrainedLayersFrom("../models/pose_iter_440000.caffemodel");
@@ -32,8 +33,11 @@ int main(){
 	//	}*/
 	//	output_body.push_back(output);
 	//}
-
-	VideoCapture capture("../taolun1.mp4");
+	string output = "../output/out_ch01_00000000018000000";
+	if (!fs::IsExists(output)){
+		fs::MakeDir(output);
+	}
+	VideoCapture capture("../inputvideo/ch01_00000000018000000.mp4");
 	if (!capture.isOpened())
 	{
 		printf("video loading fail");
@@ -41,10 +45,10 @@ int main(){
 	Mat frame;
 	
 	int n = 0;
-	vector<Student_Info>student_info;
-	int frameToStart = 6750;    //taolun1
+	std::tuple<vector<vector<Student_Info>>, Class_Info>student_info;
+	//int frameToStart = 6750;    //taolun1
 	//int frameToStart = 800;       //taolun2	
-	capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
+	//capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
 	while (true)
 	{
 		if (!capture.read(frame)){
@@ -54,13 +58,13 @@ int main(){
 		if (n<25*10){
 			cv::resize(frame, frame, Size(0, 0), 2 / 3., 2 / 3.);
 			PoseInfo pose1;
-			GetStandaredFeats(net1, pose1,frame,n);		
+			GetStandaredFeats(net1, pose1,frame,n,output);		
 		}	
 
 		else{
 			cv::resize(frame, frame, Size(0, 0), 2 / 3., 2 / 3.);
 			PoseInfo pose;
-			student_info = student_detect(net1, frame, n, pose);
+			student_info = student_detect(net1, frame, n, pose, output);
 		}
 		n++;
 	}
