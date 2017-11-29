@@ -15,7 +15,8 @@ using namespace cv;
 using namespace caffe;
 using namespace fs;
 
-vector<string>output_body;
+string videoname = "taolun1";
+
 int main(){
 	if (caffe::GPUAvailable()) {
 		caffe::SetMode(caffe::GPU, 0);
@@ -23,21 +24,12 @@ int main(){
 	Net net1("../models/pose_deploy.prototxt");
 	net1.CopyTrainedLayersFrom("../models/pose_iter_440000.caffemodel");
 	
-	/*Net net2("../models/feat.prototxt");
-	net2.CopyTrainedLayersFrom("../models/feat.caffemodel");*/
-
-	//for (int i = 0; i <70; i++){
-	//	string output = "../bodydir/body" + to_string(i);
-	//	/*if (!fs::IsExists(output)){
-	//	fs::MakeDir(output);
-	//	}*/
-	//	output_body.push_back(output);
-	//}
-	string output = "../output/out_ch01_00000000018000000";
+	string output = "../output/"+videoname;
 	if (!fs::IsExists(output)){
 		fs::MakeDir(output);
 	}
-	VideoCapture capture("../inputvideo/ch01_00000000018000000.mp4");
+	string videopath = "../inputvideo/" + videoname+".mp4";
+	VideoCapture capture(videopath);
 	if (!capture.isOpened())
 	{
 		printf("video loading fail");
@@ -45,10 +37,10 @@ int main(){
 	Mat frame;
 	
 	int n = 0;
-	std::tuple<vector<vector<Student_Info>>, Class_Info>student_info;
-	//int frameToStart = 6750;    //taolun1
+	std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_info;
+	int frameToStart = 6750;    //taolun1
 	//int frameToStart = 800;       //taolun2	
-	//capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
+	capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
 	while (true)
 	{
 		if (!capture.read(frame)){
@@ -83,6 +75,6 @@ int main(){
 		student_info = student_detect(net1, image, n, pose);
 		n++;
 	}*/
-
+	
 }
 

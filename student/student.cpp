@@ -13,10 +13,13 @@
 #include "student/functions.hpp"
 #include<cmath>
 #include<tuple>
+#ifdef __unix__
+#include<json/json.h>
+#endif
 using namespace cv;
 using namespace std;
 using namespace caffe;
-
+vector<Class_Info>class_info_all;
 vector<int>student_valid;
 vector<vector<Student_Info>>students_all(70);
 int standard_frame = 25;
@@ -48,16 +51,11 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &outpu
 						standard_rect.height = wid1 + wid2-15;
 						refine(standard_rect, frame);
 						cv::rectangle(frame, standard_rect, Scalar(0, 0, 255), 2, 8, 0);
-						/*if (!fs::IsExists(output_body[i])){
-							fs::MakeDir(output_body[i]);
-							}*/
-						
+					
 						Student_Info student_ori;
 						student_ori.body_bbox = standard_rect;
 						student_ori.neck_loc = Point2f(pose.candicate[pose.subset[i][1]][0], pose.candicate[pose.subset[i][1]][1]);
-						/*if (pose.subset[i][0] != -1){
-							student_ori.loc = Point2f(pose.candicate[pose.subset[i][0]][0], pose.candicate[pose.subset[i][0]][1]);
-							}*/
+		
 						if (pose.subset[i][0] != -1){
 							student_ori.loc = Point2f(pose.candicate[pose.subset[i][0]][0], pose.candicate[pose.subset[i][0]][1]);
 							student_ori.front = true;
@@ -66,18 +64,13 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &outpu
 							student_ori.loc = student_ori.neck_loc;
 							student_ori.front = false;
 						}
-						
-						/*student_ori.output_body_dir = output_body[i];*/
-
+		
 						student_valid.push_back(i);
 						students_all[i].push_back(student_ori);
-
-						//writeJson(n, face_ori.feature, out);
-						//string b = student_ori.output_body_dir + "/" + "0.jpg";
-						
+	
 						string b = output + "/" + "0.jpg";
 						//cv::circle(frame, student_ori.loc, 3, cv::Scalar(0, 0, 255), -1);
-						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_DUPLEX, 0.5, Scalar(0, 255, 0), 1);
+						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_DUPLEX, 0.5, Scalar(0, 255, 255), 1);
 						cv::imwrite(b, frame);
 					}
 				}
@@ -85,10 +78,10 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &outpu
 		}
 	}
 }
-std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output){
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output){
 	/*vector<Student_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output)*/
 	Timer timer;
-	Class_Info class_info;
+	
 	if (n % standard_frame == 0){
 
 		/*char buf[300];
@@ -98,15 +91,14 @@ std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Ma
 		image.copyTo(image1);*/
 		timer.Tic();
 		pose_detect(net1, image, pose);
-		/*timer.Toc();
-		cout << "pose detect cost " << timer.Elasped() / 1000.0 << " s" << endl;*/
-		//timer.Tic();
+	
 		int color[18][3] = { { 255, 0, 0 }, { 255, 85, 0 }, { 255, 0, 0 }, { 0, 255, 0 }, { 0, 0, 255 }, { 255, 0, 0 }, { 0, 255, 0 }, { 0, 0, 255 }, { 0, 255, 170 }, { 0, 255, 255 }, { 0, 170, 255 }, { 0, 255, 170 }, { 0, 255, 255 }, { 0, 170, 255 }, { 170, 0, 255 }, { 170, 0, 255 }, { 255, 0, 170 }, { 255, 0, 170 } };
 		int x[18];
 		int y[18];
 
 		for (int i = 0; i < pose.subset.size(); i++){
 			Student_Info student_info;
+			student_info.cur_frame1 = n;
 			int symbol_raise = 0;
 			int v = 0;
 			float score = float(pose.subset[i][18]) / pose.subset[i][19];
@@ -298,9 +290,11 @@ std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Ma
 			} //if (pose.subset[i][19] >= 3 && score >= 0.4) end	
 		}//for (int i = 0; i < pose.subset.size(); i++) end
 
-		Analys_Behavior(students_all, student_valid, class_info, image);
+		Analys_Behavior(students_all, student_valid, class_info_all, image, n);
+		//writeJson(student_valid, students_all, class_info_all, videoname);
+		
 		string output1;
-		if (class_info.all_bow_head || class_info.all_disscussion_2 || class_info.all_disscussion_4){
+		if (class_info_all[class_info_all.size() - 1].all_bow_head || class_info_all[class_info_all.size() - 1].all_disscussion_2 || class_info_all[class_info_all.size() - 1].all_disscussion_4){
 			output1 = output + "/" + "class__" + to_string(n) + ".jpg";
 		}
 		else{
@@ -310,5 +304,5 @@ std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Ma
 		timer.Toc();
 		cout << "the " << n << " frame cost " << timer.Elasped() / 1000.0 << " s" << endl;
 	} //if (n % standard_frame == 0) end
-	return std::make_tuple(students_all, class_info);
+	return std::make_tuple(students_all, class_info_all);
 }

@@ -12,6 +12,7 @@ struct Class_Info{
 	bool all_bow_head=false;
 	bool all_disscussion_2 = false;
 	bool all_disscussion_4 = false;
+	int cur_frame;
 };
 struct Student_Info{
 	bool raising_hand=false;
@@ -29,10 +30,12 @@ struct Student_Info{
 	Point2f neck_loc;
 	Rect body_bbox;
 	string output_body_dir;
+	int cur_frame1;
 	bool front=false;
 	bool back = false;
 };
 //vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
-std::tuple<vector<vector<Student_Info>>, Class_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output);
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output);
 void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &output);
+extern string videoname;
 #endif

@@ -1,4 +1,4 @@
-
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <opencv2/core/core.hpp>
@@ -8,6 +8,10 @@
 #include "student/student.hpp"
 #include "student/functions.hpp"
 #include<cmath>
+#ifdef __unix__
+#include <json/json.h>
+//#include <python2.7/Python.h>
+#endif
 using namespace cv;
 using namespace std;
 
@@ -142,4 +146,51 @@ float Compute_IOU(const cv::Rect& rectA, const cv::Rect& rectB){
 }
 bool greate2(vector<float>a, vector<float>b){
 	return a[1] > b[1];
+}
+void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_all, vector<Class_Info>&class_info_all, string &videoname){
+	Json::Value root;
+	vector<string>human;
+	for (int i = 0; i < student_valid.size(); i++){
+		string human_x = "student" + to_string(student_valid[i]);
+		human.push_back(human_x);
+	}
+	Json::Value class_infomation;
+	for (int i = 0; i < class_info_all.size(); i++){
+		if (class_info_all[i].all_bow_head == true){
+			class_infomation["all_bow_head"].append(class_info_all[i].cur_frame);
+		}
+		if (class_info_all[i].all_disscussion_2 == true){
+			class_infomation["2-students'disscussion"].append(class_info_all[i].cur_frame);
+		}
+		if (class_info_all[i].all_disscussion_4 == true){
+			class_infomation["4-students'disscussion"].append(class_info_all[i].cur_frame);
+		}
+	}
+	root["class_infomation"] = Json::Value(class_infomation);
+
+	for (int i = 0; i < student_valid.size(); i++){
+		Json::Value behavior_infomation;
+		for (int j = 1; j < students_all[student_valid[i]].size(); j++){
+			if (students_all[student_valid[i]][j].bow_head == true){
+				behavior_infomation["bow_head"].append(students_all[student_valid[i]][j].cur_frame1);
+			}
+			if (students_all[student_valid[i]][j].daze == true){
+				behavior_infomation["daze"].append(students_all[student_valid[i]][j].cur_frame1);
+			}
+			if (students_all[student_valid[i]][j].raising_hand == true){
+				behavior_infomation["rasing_hand"].append(students_all[student_valid[i]][j].cur_frame1);
+			}
+			if (students_all[student_valid[i]][j].standing == true){
+				behavior_infomation["standing"].append(students_all[student_valid[i]][j].cur_frame1);
+			}
+		}
+		root[human[i]] = Json::Value(behavior_infomation);
+	}
+	ofstream out;
+	string jsonfile = "../output_json/" + videoname + ".json";
+	out.open(jsonfile);
+	Json::StyledWriter sw;
+	out << sw.write(root);
+	out.close();
+
 }
