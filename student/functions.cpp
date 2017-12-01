@@ -147,6 +147,9 @@ float Compute_IOU(const cv::Rect& rectA, const cv::Rect& rectB){
 bool greate2(vector<float>a, vector<float>b){
 	return a[1] > b[1];
 }
+bool greate3(Student_Info a, Student_Info b){
+	return a.energy > b.energy;
+}
 void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_all, vector<Class_Info>&class_info_all, string &videoname){
 	Json::Value root;
 	vector<string>human;
@@ -155,7 +158,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 		human.push_back(human_x);
 	}
 	Json::Value class_infomation;
-	for (int i = 0; i < class_info_all.size(); i++){
+	/*for (int i = 0; i < class_info_all.size(); i++){
 		if (class_info_all[i].all_bow_head == true){
 			class_infomation["all_bow_head"].append(class_info_all[i].cur_frame);
 		}
@@ -165,12 +168,14 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 		if (class_info_all[i].all_disscussion_4 == true){
 			class_infomation["4-students'disscussion"].append(class_info_all[i].cur_frame);
 		}
-	}
+	}*/
 	root["class_infomation"] = Json::Value(class_infomation);
 
 	for (int i = 0; i < student_valid.size(); i++){
+
 		Json::Value behavior_infomation;
-		for (int j = 1; j < students_all[student_valid[i]].size(); j++){
+		behavior_infomation["max_energy"] = students_all[student_valid[i]][0].cur_frame1;
+		/*for (int j = 1; j < students_all[student_valid[i]].size(); j++){
 			if (students_all[student_valid[i]][j].bow_head == true){
 				behavior_infomation["bow_head"].append(students_all[student_valid[i]][j].cur_frame1);
 			}
@@ -183,7 +188,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 			if (students_all[student_valid[i]][j].standing == true){
 				behavior_infomation["standing"].append(students_all[student_valid[i]][j].cur_frame1);
 			}
-		}
+		}*/
 		root[human[i]] = Json::Value(behavior_infomation);
 	}
 	ofstream out;
@@ -193,4 +198,20 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 	out << sw.write(root);
 	out.close();
 
+}
+void drawGrid(Mat &image, vector<int>student_valid,vector<vector<Student_Info>>students_all){
+	vector<vector<int>>orderr = { { 14, 3, 21, 19, 5, 17 }, { 15, 20, 2, 9, 12, 22, 24 }, { 7, 0, 1, 26, 50, 48 }, { 27, 4, 6, 32, 29, 49, 13 }, { 23, 41, 8, 34, 39, 35, 31 }, { 38, 43, 28, 10, 16, 42, 51 }, { 18, 37, 33, 30, 44, 40 }, {47,45,25,11,46,36} };
+	for (int i = 0; i < orderr.size(); i++){
+		for (int j = 0; j < orderr[i].size()-1; j++){
+			auto iter1 = find(student_valid.begin(), student_valid.end(), orderr[i][j]);
+			int index1 = distance(student_valid.begin(), iter1);
+			auto iter2 = find(student_valid.begin(), student_valid.end(), orderr[i][j+1]);
+			int index2 = distance(student_valid.begin(), iter2);
+			/*Point2f start = students_all[orderr[i][j]][students_all[orderr[i][j]].size() - 1].loc;
+			Point2f end = students_all[orderr[i][j+1]][students_all[orderr[i][j+1]].size() - 1].loc;*/
+			Point2f start = students_all[student_valid[index1]][students_all[student_valid[index1]].size() - 1].loc;
+			Point2f end = students_all[student_valid[index2]][students_all[student_valid[index2]].size() - 1].loc;
+			line(image, start, end, Scalar(255, 0, 0), 2, 8, 0);
+		}
+	}
 }

@@ -10,12 +10,13 @@
 #include <thread>
 #include "student/student.hpp"
 #include "student/functions.hpp"
+#include<tuple>
 using namespace std;
 using namespace cv;
 using namespace caffe;
 using namespace fs;
 
-string videoname = "taolun1";
+string videoname = "4dis";
 
 int main(){
 	if (caffe::GPUAvailable()) {
@@ -34,13 +35,15 @@ int main(){
 	{
 		printf("video loading fail");
 	}
-	Mat frame;
+	long totalFrameNumber = capture.get(CV_CAP_PROP_FRAME_COUNT);
+	cout << "all " << totalFrameNumber << " frame" << endl;
+	long frameToStart = 9000; 
+	capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
 	
+
+	Mat frame;	
 	int n = 0;
 	std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_info;
-	int frameToStart = 6750;    //taolun1
-	//int frameToStart = 800;       //taolun2	
-	capture.set(CV_CAP_PROP_POS_FRAMES, frameToStart);
 	while (true)
 	{
 		if (!capture.read(frame)){
@@ -57,6 +60,8 @@ int main(){
 			cv::resize(frame, frame, Size(0, 0), 2 / 3., 2 / 3.);
 			PoseInfo pose;
 			student_info = student_detect(net1, frame, n, pose, output);
+			/*vector<vector<Student_Info>>students_all = get<0>(student_info);
+			vector<Class_Info>class_info_all = get<1>(student_info);*/
 		}
 		n++;
 	}

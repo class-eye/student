@@ -31,6 +31,9 @@ struct Student_Info{
 	Rect body_bbox;
 	string output_body_dir;
 	int cur_frame1;
+	int cur_size = 0;
+	int energy = 0;
+	int max_energy = 0;
 	bool front=false;
 	bool back = false;
 };
