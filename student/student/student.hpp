@@ -36,6 +36,7 @@ struct Student_Info{
 	int max_energy = 0;
 	bool front=false;
 	bool back = false;
+	vector<Point2f>all_points;
 };
 //vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
 std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output);

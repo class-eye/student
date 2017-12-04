@@ -89,7 +89,7 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 		}
 		
 		Mat map;
-		GaussianBlur(map_ori, map, Size(11,11),3, 3);
+		GaussianBlur(map_ori, map, Size(13,13),5, 5);
 
 		Mat map_left = Mat::zeros(oriImg.size[0], oriImg.size[1], CV_32F);
 		map.rowRange(0, oriImg.size[0] - 1).copyTo(map_left.rowRange(1, oriImg.size[0]));

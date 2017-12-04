@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "caffe/caffe.hpp"
 #include "cv.h"  
 #include "student/student.hpp"
@@ -44,12 +45,13 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &outpu
 						if (wid == 0)continue;
 						
 						Rect standard_rect;
-						standard_rect.x = pose.candicate[pose.subset[i][1]][0]-wid;
+						standard_rect.x = pose.candicate[pose.subset[i][1]][0] - wid - 5;
 						standard_rect.y = pose.candicate[pose.subset[i][1]][1];
-						standard_rect.width = wid1 + wid2;
+						standard_rect.width = wid1 + wid2 + 10;
 						standard_rect.height = wid1 + wid2-15;
+						if (standard_rect.height < 5)standard_rect.height = 15;
 						refine(standard_rect, frame);
-						cv::rectangle(frame, standard_rect, Scalar(0, 0, 255), 2, 8, 0);
+						//cv::rectangle(frame, standard_rect, Scalar(0, 0, 255), 2, 8, 0);
 					
 						Student_Info student_ori;
 						student_ori.body_bbox = standard_rect;
@@ -63,13 +65,11 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &outpu
 							student_ori.loc = student_ori.neck_loc;
 							student_ori.front = false;
 						}
-		
 						student_valid.push_back(i);
-						students_all[i].push_back(student_ori);
-						
+						students_all[i].push_back(student_ori);					
 						string b = output + "/" + "0.jpg";
 						//cv::circle(frame, student_ori.loc, 3, cv::Scalar(0, 0, 255), -1);
-						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_DUPLEX, 0.5, Scalar(0, 255, 255), 1);
+						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 255, 255), 1);
 						cv::imwrite(b, frame);
 					}
 				}
@@ -117,8 +117,10 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					else{
 						x[j] = pose.candicate[pose.subset[i][j]][0];
 						y[j] = pose.candicate[pose.subset[i][j]][1];
-					}
+					}			
+					//student_info.all_points.push_back(Point2f(x[j], y[j]));
 				}
+
 				//-----------判断双手垂直（为了站立）--------------------
 
 				if (v == 0){
@@ -227,17 +229,17 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 
 					Rect cur_rect;
 					if (student_info.arm_vertical){
-						cur_rect.x = pose.candicate[pose.subset[i][1]][0] - wid;
+						cur_rect.x = pose.candicate[pose.subset[i][1]][0] - wid-5;
 						cur_rect.y = pose.candicate[pose.subset[i][1]][1];
 						cur_rect.width = wid1 + wid2+10;
-						cur_rect.height = wid1 + wid2 + 45;
+						cur_rect.height = wid1 + wid2 -15+ 40;
 					}
 					else{
 						cur_rect.x = pose.candicate[pose.subset[i][1]][0] - wid;
 						cur_rect.y = pose.candicate[pose.subset[i][1]][1];
 						cur_rect.width = wid1 + wid2;
 						cur_rect.height = wid1 + wid2 - 15;
-						if (cur_rect.height < 0)cur_rect.height = 10;
+						if (cur_rect.height < 5)cur_rect.height = 15;
 					}
 					refine(cur_rect, image);
 
@@ -257,27 +259,19 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 						student_info.front = false;
 					}
 
-
-
 					//---------------- IOU recognization in a rect range --------------------------------------
 
-					vector<float>dist;
-					vector<vector<float>>dists;
+					std::multimap<float, int, greater<float>>IOU_map;
 					for (int j = 0; j < student_valid.size(); j++){
 						float cur_IOU = Compute_IOU(students_all[student_valid[j]][0].body_bbox, cur_rect);
-						dist.push_back(student_valid[j]);
-						dist.push_back(cur_IOU);
-						dists.push_back(dist);
-						dist.clear();
+						IOU_map.insert(make_pair(cur_IOU, student_valid[j]));
 					}
-
-					sort(dists.begin(), dists.end(), greate2);
-					if (dists[0][1] > 0){
+					if (IOU_map.begin()->first > 0){
 						int thre = (student_info.loc.y < image.size().height / 2) ? 100 : 150;
-						int size1 = students_all[dists[0][0]].size();
-						float dis = abs(students_all[dists[0][0]][size1 - 1].loc.y - student_info.loc.y);
+						int size1 = students_all[IOU_map.begin()->second].size();
+						float dis = abs(students_all[IOU_map.begin()->second][size1 - 1].loc.y - student_info.loc.y);
 						if (dis < thre){
-							students_all[dists[0][0]].push_back(student_info);
+							students_all[IOU_map.begin()->second].push_back(student_info);
 						}
 					}
 					else{
@@ -298,11 +292,11 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 
 		//----------------------分析行为------------------------------
 		Analys_Behavior(students_all, student_valid, class_info_all, image, n);
-		writeJson(student_valid, students_all, class_info_all, videoname);
+		//writeJson(student_valid, students_all, class_info_all, videoname,n);
 		//drawGrid(image,student_valid,students_all);
 
 		string output1;
-		if (class_info_all[class_info_all.size() - 1].all_bow_head || class_info_all[class_info_all.size() - 1].all_disscussion_2 || class_info_all[class_info_all.size() - 1].all_disscussion_4){
+		if (class_info_all.size()>0 && (class_info_all[class_info_all.size() - 1].all_bow_head || class_info_all[class_info_all.size() - 1].all_disscussion_2 || class_info_all[class_info_all.size() - 1].all_disscussion_4)){
 			output1 = output + "/" + to_string(n)+"-class" + ".jpg";
 		}
 		else{

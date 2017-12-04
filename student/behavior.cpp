@@ -130,7 +130,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 				if (distance < thre)students_all[student_valid[j]][0].energy++;
 				else students_all[student_valid[j]][0].energy = 0;
 				line(image, Point2f(x2, y2), Point2f(x2, y2 - students_all[student_valid[j]][0].energy), cv::Scalar(255, 0, 255), 2, 8, 0);
-				//cv::putText(image, to_string(students_all[student_valid[j]][0].energy), cv::Point2f(x2, y2 - students_all[student_valid[j]][0].energy), FONT_HERSHEY_COMPLEX, 0.5, Scalar(255, 0, 255), 1);
+				//cv::putText(image, to_string(students_all[student_valid[j]][0].energy), cv::Point2f(x2 + 8, y2 - students_all[student_valid[j]][0].energy), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1);
 				if (students_all[student_valid[j]][0].energy > students_all[student_valid[j]][0].max_energy){
 					students_all[student_valid[j]][0].max_energy = students_all[student_valid[j]][0].energy;
 					students_all[student_valid[j]][0].cur_frame1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].cur_frame1;
@@ -165,20 +165,20 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 
 			//----------------如果发呆----------------------------
 			/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze == true){
-				cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1);
+				cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
 			}*/
 			//---------------如果起立-----------------------------
 			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
-				cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
+				cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
 			}
 			//----------------如果低头----------------------------
 
 			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
-				cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
+				cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
 			}
 			//-----------------如果举手-----------------------------
 			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
-				cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 0, 255), 0.7);
+				cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 0.7);
 			}
 		}
 	}//for (int j = 0; j < student_valid.size(); j++) end
@@ -195,14 +195,14 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 	}
 	//----------------如果讨论--------------------------
 	if (class_info.all_disscussion_2 == true){
-		cv::putText(image, status3, cv::Point2f(image.size[1] / 2, 50), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 255), 1);
+		cv::putText(image, status3, cv::Point2f(image.size[1] / 2, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 255), 1);
 	}
 	if (class_info.all_disscussion_4 == true){
-		cv::putText(image, status3back, cv::Point2f(image.size[1] / 2, 50), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 255), 1);
+		cv::putText(image, status3back, cv::Point2f(image.size[1] / 2, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 255), 1);
 	}
 	//-----------------如果低头-------------------------
 	if (class_info.all_bow_head == true){
-		cv::putText(image, status5, cv::Point2f(image.size[1] / 2, 70), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 255), 1);
+		cv::putText(image, status5, cv::Point2f(image.size[1] / 2, 70), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 255), 1);
 	}
 
 
