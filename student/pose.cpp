@@ -31,23 +31,22 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	cv::split(imagetotest, bgr);
 	bgr[0].convertTo(bgr[0], CV_32F, 1/256.f, -0.5);
 	bgr[1].convertTo(bgr[1], CV_32F, 1/256.f, -0.5);
-	bgr[2].convertTo(bgr[2], CV_32F, 1/256.f, -0.5);
-	
+	bgr[2].convertTo(bgr[2], CV_32F, 1/256.f, -0.5);	
 	shared_ptr<Blob> data = net.blob_by_name("data");
-	data->Reshape(1, 3, imagetotest.rows, imagetotest.cols);
-	
+	data->Reshape(1, 3, imagetotest.rows, imagetotest.cols);	
 	const int bias = data->offset(0, 1, 0, 0);
-	const int bytes = bias*sizeof(float);
-	
+	const int bytes = bias*sizeof(float);	
 	memcpy(data->mutable_cpu_data() + 0 * bias, bgr[0].data, bytes);
 	memcpy(data->mutable_cpu_data() + 1 * bias, bgr[1].data, bytes);
 	memcpy(data->mutable_cpu_data() + 2 * bias, bgr[2].data, bytes);
 	net.Forward();
-
 	shared_ptr<Blob> output_blobs = net.blob_by_name("Mconv7_stage6_L2");
 	shared_ptr<Blob> output_blobs1 = net.blob_by_name("Mconv7_stage6_L1");
+
+#if 0
+	
 	Mat heatmap = Mat::zeros(output_blobs->height(), output_blobs->width(), CV_32FC(19));
-	Mat paf_avg = Mat::zeros(output_blobs1->height(), output_blobs1->width(), CV_32FC(38));
+	Mat paf_avg = Mat::zeros(output_blobs1->height(), output_blobs1->width(), CV_32FC(38));	
 	for (int i = 0; i < output_blobs->channels(); i++){
 		for (int j = 0; j < output_blobs->height(); j++){
 			for (int k = 0; k < output_blobs->width(); k++){
@@ -62,29 +61,48 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 			}
 		}
 	}
-	//cv::resize(heatmap, heatmap, Size(0, 0), stride, stride);
 	cv::resize(heatmap, heatmap, cv::Size(oriImg.size[1], oriImg.size[0]));
-	//cv::resize(paf_avg, paf_avg, Size(0, 0), stride, stride);
 	cv::resize(paf_avg, paf_avg, cv::Size(oriImg.size[1], oriImg.size[0]));
-	/*for (int i = 0; i < 9; i++){
-		cout << heatmap.at<float>(800, i) << "  " << endl;
-	}*/
+
+#endif
+
+#if 1
+	vector<Mat>all_heatmap;
+	const int bias1 = output_blobs->offset(0, 1, 0, 0);
+	const int bytes1 = bias1*sizeof(float);
+	for (int i = 0; i < output_blobs->channels(); i++){
+		Mat img = Mat::zeros(output_blobs->height(), output_blobs->width(), CV_32FC1);
+		memcpy(img.data, output_blobs->mutable_cpu_data() + i*bias1, bytes1);	
+		cv::resize(img, img, cv::Size(oriImg.size[1], oriImg.size[0]));		
+		all_heatmap.push_back(img);
+	}
+	vector<Mat>all_paf_avg;
+	const int bias2 = output_blobs1->offset(0, 1, 0, 0);
+	const int bytes2 = bias2*sizeof(float);
+	for (int i = 0; i < output_blobs1->channels(); i++){
+		Mat img = Mat::zeros(output_blobs1->height(), output_blobs1->width(), CV_32FC1);
+		memcpy(img.data, output_blobs1->mutable_cpu_data() + i*bias2, bytes2);
+		cv::resize(img, img, cv::Size(oriImg.size[1], oriImg.size[0]));
+		all_paf_avg.push_back(img);
+	}
+#endif
+
+
 	Mat compare1, compare2, compare3, compare4, compare5;
 	Mat bool_1, bool_2, bool_3, bool_4;
 	Mat map_1(oriImg.size[0], oriImg.size[1], CV_32F, cv::Scalar::all(0.1));
 	vector<float>peaks;
 	int peak_counter = 0;
 	Point max_loc;
-	
 	double max_val=0;
 	Mat map_ori = Mat::zeros(oriImg.size[0], oriImg.size[1],CV_32F);
 	//cout << oriImg.size[0] << oriImg.size[1] << endl;
 	
-
 	for (int i = 0; i < 8; i++){
 		for (int j = 0; j < oriImg.size[0]; j++){
 			for (int k = 0; k < oriImg.size[1]; k++){
-				map_ori.at<float>(j, k) = heatmap.at<float>(j, 19 * k + i);
+				//map_ori.at<float>(j, k) = heatmap.at<float>(j, 19 * k + i);
+				map_ori.at<float>(j, k) = all_heatmap[i].at<float>(j, k);
 			}
 		}
 		
@@ -141,6 +159,7 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 		peaks.clear();*/
 		
 	}
+
 	int limbSeq[19][2] = { { 2, 1 }, { 2, 3 }, { 2, 6 }, { 3, 4 }, { 4, 5 }, { 6, 7 }, { 7, 8 }, { 2, 9 }, { 9, 10 }, { 10, 11 }, { 2, 12 }, { 12, 13 }, { 13, 14 }, { 1, 15 }, { 15, 17 }, { 1, 16 }, { 16, 18 }, { 3, 17 }, { 6, 18 } };
 	int mapIdx[19][2] = { { 47, 48 }, { 31, 32 }, { 39, 40 }, { 33, 34 }, { 35, 36 }, { 41, 42 }, { 43, 44 }, { 19, 20 }, { 21, 22 }, { 23, 24 }, { 25, 26 }, { 27, 28 }, { 29, 30 }, { 49, 50 }, { 53, 54 }, { 51, 52 }, { 55, 56 }, { 37, 38 }, { 45, 46 } };
 	vector<vector<vector<float>>>connection_all;
@@ -156,8 +175,10 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	//for (int i = 0; i < 2; i++){
 		for (int j = 0; j < oriImg.size[0]; j++){
 			for (int k = 0; k < oriImg.size[1]; k++){
-				score_mid1.at<float>(j, k) = paf_avg.at<float>(j, 38 * k + (mapIdx[i][0] - 19));
-				score_mid2.at<float>(j, k) = paf_avg.at<float>(j, 38 * k + (mapIdx[i][1] - 19));
+				//score_mid1.at<float>(j, k) = paf_avg.at<float>(j, 38 * k + (mapIdx[i][0] - 19));
+				//score_mid2.at<float>(j, k) = paf_avg.at<float>(j, 38 * k + (mapIdx[i][1] - 19));
+				score_mid1.at<float>(j, k) = all_paf_avg[mapIdx[i][0] - 19].at<float>(j, k);
+				score_mid2.at<float>(j, k) = all_paf_avg[mapIdx[i][1] - 19].at<float>(j, k);
 			}
 		}
 		
@@ -279,7 +300,6 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 			connection_all.push_back(bbb);
 		}
 	}
-	
 	vector<float>candicate;
 	for (int i = 0; i < pose.all_peaks.size(); i++){
 		for (int j = 0; j < pose.all_peaks[i].size() / 4; j++){
