@@ -27,6 +27,7 @@ int max_student_num = 0;
 
 void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &output){
 	if (n%standard_frame == 0){
+		Timer timer;
 		pose_detect(net1, frame, pose);
 		if (pose.subset.size() > max_student_num){
 			max_student_num = pose.subset.size();
@@ -202,7 +203,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					if (abs(y[2] - y[5]) >= abs(x[2] - x[5])){
 						student_info.turn_body = true;
 					}
-					if (x[2] > x[5])student_info.back = true;
+					if (x[2] >= x[5])student_info.back = true;
 					if (pose.subset[i][0] == -1)student_info.bow_head_tmp = true;
 				}
 
