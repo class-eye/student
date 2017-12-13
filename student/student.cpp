@@ -21,11 +21,10 @@ using namespace caffe;
 vector<Class_Info>class_info_all;
 vector<int>student_valid;
 vector<vector<Student_Info>>students_all(70);
-Student_Info biggest_energy;
-int standard_frame = 25;
-int max_student_num = 0;
+int standard_frame = 1;
+//int max_student_num = 0;
 
-void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &output){
+void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output,int &max_student_num){
 	if (n%standard_frame == 0){
 		Timer timer;
 		pose_detect(net1, frame, pose);
@@ -291,9 +290,10 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 			} //if (pose.subset[i][19] >= 3 && score >= 0.4) end
 		}//for (int i = 0; i < pose.subset.size(); i++) end
 
+		
 		//----------------------·ÖÎöÐÐÎª------------------------------
 		Analys_Behavior(students_all, student_valid, class_info_all, image, n);
-		//writeJson(student_valid, students_all, class_info_all, videoname,n);
+		writeJson(student_valid, students_all, class_info_all, output,n);
 		//drawGrid(image,student_valid,students_all);
 
 		string output1;

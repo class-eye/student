@@ -40,6 +40,6 @@ struct Student_Info{
 };
 //vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
 std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output);
-void GetStandaredFeats(Net &net1, PoseInfo &pose,Mat &frame,int &n,string &output);
-extern string videoname;
+void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num);
+
 #endif

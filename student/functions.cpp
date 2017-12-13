@@ -152,14 +152,14 @@ bool greate3(Student_Info a, Student_Info b){
 }
 
 //Json::Value root_all;
-void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_all, vector<Class_Info>&class_info_all, string &videoname,int &n){
+void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_all, vector<Class_Info>&class_info_all, string &output,int &n){
 	Json::Value root;
 	vector<string>human;
 	for (int i = 0; i < student_valid.size(); i++){
 		string human_x = "student" + to_string(student_valid[i]);
 		human.push_back(human_x);
 	}
-	root["Frame"] = n;
+	//root["Frame"] = n;
 	Json::Value class_infomation;
 	for (int i = 0; i < class_info_all.size(); i++){
 		if (class_info_all[i].all_bow_head == true){
@@ -209,9 +209,11 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 		}*/
 	}
 	//root_all.append(root);
-
+	int pos1 = output.find_last_of("/");
+	int pos2 = output.find_last_of(".");
+	string videoname = output.substr(pos1, pos2 - pos1);
 	ofstream out;
-	string jsonfile = "../output_json/" + videoname + ".json";
+	string jsonfile = output.substr(0,pos1)+"/" + videoname + ".json";
 	out.open(jsonfile);
 	Json::StyledWriter sw;
 	out << sw.write(root);
