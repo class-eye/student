@@ -6,7 +6,6 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #include "caffe/caffe.hpp"
 #include "cv.h"  
 #include "student/student.hpp"
@@ -24,7 +23,7 @@ vector<vector<Student_Info>>students_all(70);
 int standard_frame = 1;
 //int max_student_num = 0;
 
-void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output,int &max_student_num){
+void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num){
 	if (n%standard_frame == 0){
 		Timer timer;
 		pose_detect(net1, frame, pose);
@@ -77,12 +76,12 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &ou
 		}
 	}
 }
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output){
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime){
 	/*vector<Student_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output)*/
 	Timer timer;
 	
 	if (n % standard_frame == 0){
-
+	
 		/*char buf[300];
 		sprintf(buf, "../tmp/%d.jpg", n);
 		cv::imwrite(buf, image);*/
@@ -97,10 +96,12 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 		int x[18];
 		int y[18];
 
+		int num_turn_body = 0;
+
 		for (int i = 0; i < pose.subset.size(); i++){
 			Student_Info student_info;
 			student_info.cur_frame1 = n;
-			
+			student_info.pstSystemTime = pstSystemTime;
 			int symbol_raise = 0;
 			int v = 0;
 			float score = float(pose.subset[i][18]) / pose.subset[i][19];
@@ -185,13 +186,13 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 							student_info.turn_head = true;
 						}
 						else{
-							if (abs(x[0] - x[1]) / abs(x[0] - x[5]) > 5)student_info.turn_head = true;
+							if (abs(x[0] - x[1]) / abs(x[0] - x[5]) > 6)student_info.turn_head = true;
 						}
 						if (x[0] <= x[2]){
 							student_info.turn_head = true;
 						}
 						else{
-							if (abs(x[0] - x[1]) / abs(x[0] - x[2]) > 5)student_info.turn_head = true;
+							if (abs(x[0] - x[1]) / abs(x[0] - x[2]) > 6)student_info.turn_head = true;
 						}
 					}
 					else{
@@ -201,6 +202,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 				if (pose.subset[i][2] != -1 && pose.subset[i][5] != -1){
 					if (abs(y[2] - y[5]) >= abs(x[2] - x[5])){
 						student_info.turn_body = true;
+						num_turn_body++;
 					}
 					if (x[2] >= x[5])student_info.back = true;
 					if (pose.subset[i][0] == -1)student_info.bow_head_tmp = true;
@@ -292,17 +294,24 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 
 		
 		//----------------------·ÖÎöÐÐÎª------------------------------
-		Analys_Behavior(students_all, student_valid, class_info_all, image, n);
-		writeJson(student_valid, students_all, class_info_all, output,n);
+		Analys_Behavior(students_all, student_valid, class_info_all, image, n, pstSystemTime,num_turn_body);
+		writeJson(student_valid, students_all, class_info_all, output, n);
 		//drawGrid(image,student_valid,students_all);
 
 		string output1;
-		if (class_info_all.size()>0 && (class_info_all[class_info_all.size() - 1].all_bow_head || class_info_all[class_info_all.size() - 1].all_disscussion_2 || class_info_all[class_info_all.size() - 1].all_disscussion_4)){
-			output1 = output + "/" + to_string(n)+"-class" + ".jpg";
+		if (class_info_all.size()>0 && (class_info_all[class_info_all.size() - 1].all_bow_head)){
+			output1 = output + "/" + to_string(n)+"-bow" + ".jpg";
+		}
+		else if (class_info_all.size() > 0 && class_info_all[class_info_all.size() - 1].all_disscussion_2){
+			output1 = output + "/" + to_string(n) + "-dis2" + ".jpg";
+		}
+		else if (class_info_all.size() > 0 && class_info_all[class_info_all.size() - 1].all_disscussion_4){
+			output1 = output + "/" + to_string(n) + "-dis4" + ".jpg";
 		}
 		else{
 			output1 = output + "/" + to_string(n) + ".jpg";
 		}
+		//cv::resize(image, image, Size(0, 0), 1 / 2., 1 / 2.);
 		cv::imwrite(output1, image);
 		timer.Toc();
 		cout << "the " << n << " frame cost " << timer.Elasped() / 1000.0 << " s" << endl;

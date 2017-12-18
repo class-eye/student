@@ -152,6 +152,29 @@ bool greate3(Student_Info a, Student_Info b){
 }
 
 //Json::Value root_all;
+
+//void class_Json(Json::Value &class_infomation, vector<Class_Info>&class_info_all, int &i,bool &activity, string &start_time, string &start_frame, int &activity_order,string &end_time){
+//	int negtive_num = 0;
+//	char buff[200];
+//	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay, class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
+//	if (i - 15 >= 0){
+//		for (int j = i - 15; j < i; j++){
+//			if (class_info_all[j].all_bow_head == false)negtive_num++;
+//		}
+//		if (negtive_num == 15){
+//			//start_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+//			start_time1 = buff;
+//			start_frame1 = class_info_all[i].cur_frame;
+//			activity_order1++;
+//		}
+//	}
+//	if (class_info_all[i].cur_frame - start_frame1 < 15){
+//		start_frame1 = class_info_all[i].cur_frame;
+//		//end_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+//		end_time1 = buff;
+//	}
+//}
+
 void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_all, vector<Class_Info>&class_info_all, string &output,int &n){
 	Json::Value root;
 	vector<string>human;
@@ -159,55 +182,143 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 		string human_x = "student" + to_string(student_valid[i]);
 		human.push_back(human_x);
 	}
+
 	//root["Frame"] = n;
+	string start_time1;
+	int start_frame1 = 0;
+	int activity_order1=0;
+	string end_time1;
+	string start_time2;
+	int start_frame2 = 0;
+	int activity_order2 = 0;
+	string end_time2;
+	string start_time3;
+	int start_frame3 = 0;
+	int activity_order3 = 0;
+	string end_time3;
+	
 	Json::Value class_infomation;
+
 	for (int i = 0; i < class_info_all.size(); i++){
+		//cout << to_string(class_info_all[i].pstSystemTime_class.dwYear) << class_info_all[i].pstSystemTime_class.dwMon << class_info_all[i].pstSystemTime_class.dwDay << class_info_all[i].pstSystemTime_class.dwHour << class_info_all[i].pstSystemTime_class.dwMin << class_info_all[i].pstSystemTime_class.dwSec << endl;
+		//class_Json(class_infomation, class_info_all, i, start_time1, start_frame1, activity_order1, end_time1);
+
+
 		if (class_info_all[i].all_bow_head == true){
-			class_infomation["all_bow_head"].append(class_info_all[i].cur_frame);
+			int negtive_num=0;
+			char buff[200];
+			sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay,class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
+			if (i - 15 >= 0){
+				for (int j = i-15; j < i; j++){
+					if (class_info_all[j].all_bow_head == false)negtive_num++;
+				}
+				if (negtive_num == 15){
+					//start_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+					start_time1 = buff;
+					start_frame1 = class_info_all[i].cur_frame;
+					activity_order1++;
+				}
+			}	
+			if (class_info_all[i].cur_frame - start_frame1 < 15){
+				start_frame1 = class_info_all[i].cur_frame;
+				//end_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+				end_time1 = buff;
+			}
+			string append_string = start_time1 + "  to  " + end_time1;
+	
+			class_infomation["all_bow_head"][activity_order1] = append_string;
+			//class_infomation["all_bow_head"].append(class_info_all[i].cur_frame);
 		}
 		if (class_info_all[i].all_disscussion_2 == true){
-			class_infomation["2-students'disscussion"].append(class_info_all[i].cur_frame);
+			char buff[200];
+			sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay, class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
+			//sprintf(buff, "%s/%s/%s-%s:%s:%s", to_string(class_info_all[i].pstSystemTime_class.dwYear).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMon).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwDay).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwHour).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMin).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwSec).c_str());
+			int negtive_num = 0;
+			
+			if (i - 15 >= 0){
+				for (int j = i - 15; j < i; j++){
+					if (class_info_all[j].all_disscussion_2 == false)negtive_num++;
+				}
+				if (negtive_num == 15){
+					//start_time2 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+					start_time2 = buff;
+					start_frame2 = class_info_all[i].cur_frame;
+					activity_order2++;
+				}
+			}
+			
+			if (class_info_all[i].cur_frame - start_frame2 < 15){
+				start_frame2 = class_info_all[i].cur_frame;
+				end_time2 = buff;
+				//end_time2 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+			}
+			
+			string append_string = start_time2 + "  to  " + end_time2;
+			class_infomation["2-students'disscussion"][activity_order2] = append_string;
+			//class_infomation["2-students'disscussion"].append(class_info_all[i].cur_frame);
 		}
 		if (class_info_all[i].all_disscussion_4 == true){
-			class_infomation["4-students'disscussion"].append(class_info_all[i].cur_frame);
+			char buff[200];
+			sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay, class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
+			//sprintf(buff, "%s/%s/%s-%s:%s:%s", to_string(class_info_all[i].pstSystemTime_class.dwYear).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMon).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwDay).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwHour).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMin).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwSec).c_str());
+			int negtive_num = 0;
+			if (i - 15 >= 0){
+				for (int j = i - 15; j < i; j++){
+					if (class_info_all[j].all_disscussion_4 == false)negtive_num++;
+				}
+				if (negtive_num == 15){
+					//start_time3 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+					start_time3 = buff;
+					start_frame3 = class_info_all[i].cur_frame;
+					activity_order3++;
+				}
+			}
+			if (class_info_all[i].cur_frame - start_frame3 < 15){
+				start_frame3 = class_info_all[i].cur_frame;
+				//end_time3 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
+				end_time3 = buff;
+			}
+			string append_string = start_time3 + "  to  " + end_time3;
+			class_infomation["4-students'disscussion"][activity_order3] = append_string;
+			//class_infomation["4-students'disscussion"].append(class_info_all[i].cur_frame);
 		}
 	}
 	root["class_infomation"] = Json::Value(class_infomation);
 
-	for (int i = 0; i < student_valid.size(); i++){
+	//for (int i = 0; i < student_valid.size(); i++){
 
-		Json::Value behavior_infomation;
-		behavior_infomation["max_energy"] = students_all[student_valid[i]][0].cur_frame1;
-		for (int j = 1; j < students_all[student_valid[i]].size(); j++){
-			if (students_all[student_valid[i]][j].bow_head == true){
-				behavior_infomation["bow_head"].append(students_all[student_valid[i]][j].cur_frame1);
-			}
-			if (students_all[student_valid[i]][j].daze == true){
-				behavior_infomation["daze"].append(students_all[student_valid[i]][j].cur_frame1);
-			}
-			if (students_all[student_valid[i]][j].raising_hand == true){
-				behavior_infomation["rasing_hand"].append(students_all[student_valid[i]][j].cur_frame1);
-			}
-			if (students_all[student_valid[i]][j].standing == true){
-				behavior_infomation["standing"].append(students_all[student_valid[i]][j].cur_frame1);
-			}
-		}
-		root[human[i]] = Json::Value(behavior_infomation);
+	//	Json::Value behavior_infomation;
+	//	behavior_infomation["max_energy"] = students_all[student_valid[i]][0].cur_frame1;
+	//	for (int j = 1; j < students_all[student_valid[i]].size(); j++){
+	//		if (students_all[student_valid[i]][j].bow_head == true){
+	//			behavior_infomation["bow_head"].append(students_all[student_valid[i]][j].cur_frame1);
+	//		}
+	//		if (students_all[student_valid[i]][j].daze == true){
+	//			behavior_infomation["daze"].append(students_all[student_valid[i]][j].cur_frame1);
+	//		}
+	//		if (students_all[student_valid[i]][j].raising_hand == true){
+	//			behavior_infomation["rasing_hand"].append(students_all[student_valid[i]][j].cur_frame1);
+	//		}
+	//		if (students_all[student_valid[i]][j].standing == true){
+	//			behavior_infomation["standing"].append(students_all[student_valid[i]][j].cur_frame1);
+	//		}
+	//	}
+	//	root[human[i]] = Json::Value(behavior_infomation);
 
-		/*if (students_all[student_valid[i]].size() == 1)continue;
-		else{
-			Json::Value student_loc;
-			for (int j = 0; j < 8; j++){
-				Json::Value part_loc;
-				int x = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].x;
-				int y = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].y;
-				part_loc.append(x);
-				part_loc.append(y);
-				student_loc["Parts'location"].append(part_loc);
-			}
-			root[human[i]] = Json::Value(student_loc);
-		}*/
-	}
+	//	/*if (students_all[student_valid[i]].size() == 1)continue;
+	//	else{
+	//		Json::Value student_loc;
+	//		for (int j = 0; j < 8; j++){
+	//			Json::Value part_loc;
+	//			int x = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].x;
+	//			int y = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].y;
+	//			part_loc.append(x);
+	//			part_loc.append(y);
+	//			student_loc["Parts'location"].append(part_loc);
+	//		}
+	//		root[human[i]] = Json::Value(student_loc);
+	//	}*/
+	//}
 	//root_all.append(root);
 	int pos1 = output.find_last_of("/");
 	int pos2 = output.find_last_of(".");

@@ -67,39 +67,44 @@ void yv12toYUV(char *outYuv, char *inYv12, int width, int height, int widthStep)
 Net *a;
 void CALLBACK DecCBFun(int nPort, char * pBuf, int nSize, FRAME_INFO * pFrameInfo, void* nReserved1, int nReserved2)
 {
-
-	if (caffe::GPUAvailable()) {
-		caffe::SetMode(caffe::GPU, 1);
-	}
-	long lFrameType = pFrameInfo->nType;
-	int frameH = pFrameInfo->nHeight;
-	int frameW = pFrameInfo->nWidth;
-	if (lFrameType == T_YV12)
 	{
-
-		IplImage* pImgYCrCb = cvCreateImage(cvSize(pFrameInfo->nWidth, pFrameInfo->nHeight), 8, 3);//得到图像的Y分量    
-		yv12toYUV(pImgYCrCb->imageData, pBuf, pFrameInfo->nWidth, pFrameInfo->nHeight, pImgYCrCb->widthStep);//得到全部RGB图像  
-		IplImage* pImg = cvCreateImage(cvSize(pFrameInfo->nWidth, pFrameInfo->nHeight), 8, 3);
-		cvCvtColor(pImgYCrCb, pImg, CV_YCrCb2RGB);
-		cv::Mat img(pImg, true);
-		cvReleaseImage(&pImgYCrCb);
-		cvReleaseImage(&pImg);
-		cv::resize(img, img, Size(0, 0), 2 / 3., 2 / 3.);
-		if (n < 20){
-			PoseInfo pose1;
-			GetStandaredFeats(*a, pose1, img, n, output, max_student_num);
+		if (caffe::GPUAvailable()) {
+			caffe::SetMode(caffe::GPU, 1);
 		}
-		else{
-			PoseInfo pose;
-			student_info = student_detect(*a, img, n, pose, output);
-			/*vector<vector<Student_Info>>students_all = get<0>(student_info);
-			vector<Class_Info>class_info_all = get<1>(student_info);*/
-		}
-		n++;
+		long lFrameType = pFrameInfo->nType;
+		int frameH = pFrameInfo->nHeight;
+		int frameW = pFrameInfo->nWidth;
+		if (lFrameType == T_YV12)
+		{
+			PLAYM4_SYSTEM_TIME pstSystemTime;
+			PlayM4_GetSystemTime(nPort, &pstSystemTime);
+			//cout << "tmptime--" << pstSystemTime.dwYear << " " << pstSystemTime.dwMon << " " << pstSystemTime.dwDay << " " << pstSystemTime.dwHour << " " << pstSystemTime.dwMin << " " << pstSystemTime.dwSec << endl;
+			IplImage* pImgYCrCb = cvCreateImage(cvSize(pFrameInfo->nWidth, pFrameInfo->nHeight), 8, 3);//得到图像的Y分量    
+			yv12toYUV(pImgYCrCb->imageData, pBuf, pFrameInfo->nWidth, pFrameInfo->nHeight, pImgYCrCb->widthStep);//得到全部RGB图像  
+			IplImage* pImg = cvCreateImage(cvSize(pFrameInfo->nWidth, pFrameInfo->nHeight), 8, 3);
+			cvCvtColor(pImgYCrCb, pImg, CV_YCrCb2RGB);
+			cv::Mat img(pImg, true);
+			cvReleaseImage(&pImgYCrCb);
+			cvReleaseImage(&pImg);
+			cv::resize(img, img, Size(0, 0), 2 / 3., 2 / 3.);
+			if (n < 20){
+				PoseInfo pose1;
+				GetStandaredFeats(*a, pose1, img, n, output, max_student_num);
+			}
+			else{
+				PoseInfo pose;
+				student_info = student_detect(*a, img, n, pose, output, pstSystemTime);
+				/*vector<vector<Student_Info>>students_all = get<0>(student_info);
+				vector<Class_Info>class_info_all = get<1>(student_info);*/
+			}
+			n++;
 
+		}
 	}
+	MemPoolClear();
 
 }
+
 int main()
 {
 	bool bFlag = false;
@@ -115,26 +120,33 @@ int main()
 	net1.CopyTrainedLayersFrom("../models/pose_iter_440000.caffemodel");
 	a = &net1;
 	
-	string videodir = "/home/data/jiangbo/xiaoxue/arranged/qian/1th/6-2/16";
-	string resultdir = "/home/data/Class_results/arranged/qian/1th/6-2/16";
+	string videodir = "/home/data/jiangbo/xiaoxue/arranged/qian/2th/5-3/22/yingyv2";
+	string resultdir = "/home/data/jiangbo/xiaoxue/arranged/qian/2th/5-3/22/yingyv2";
+	/*string videodir = "/home/lw/student_api/inputvideo";
+	string resultdir = "/home/lw/student_api/output";*/
 	if (!fs::IsExists(resultdir)){
 		fs::MakeDir(resultdir);
 	}
+	int i = 0;
 	vector<string>videolist = fs::ListDir(videodir, { "mp4" });
-	for (int i = 0; i < videolist.size(); i++){
+	while(i < videolist.size()){
 		initValue(n, max_student_num, class_info_all, student_valid, students_all);
 		string videoname = videolist[i];
+		//string videoname = "ditou.mp4";
 		output = resultdir + "/" + videoname;
 		if (!fs::IsExists(output)){
 			fs::MakeDir(output);
 		}
+		cout << videoname << endl;
 		string videopath = videodir + "/" + videoname;
-
-
 		//获取播放库通道号
 		PlayM4_GetPort(&g_nPort);
+		
+		
 		cout << "###duankouhao###::" << g_nPort << endl;
 		fp = fopen(videopath.c_str(), ("rb"));   //######
+		
+
 		if (fp == NULL)
 		{
 			printf("cannot open the file !\n");
@@ -148,6 +160,9 @@ int main()
 		//读取文件中海康文件头
 		fread(pBuffer, HIK_HEAD_LEN, 1, fp);
 
+		
+
+
 		//设置流模式类型 
 		PlayM4_SetStreamOpenMode(g_nPort, STREAME_FILE);
 		//打开流模式
@@ -158,8 +173,8 @@ int main()
 		PlayM4_Play(g_nPort, NULL);
 
 		//cout<<"************总时间"<<PlayM4_GetFileTime(g_nPort)<<endl;
-		//PlayM4_SetCurrentFrame(g_nPort,20);
-
+		//bool a=PlayM4_SetCurrentFrameNum(g_nPort, 300);  //从第几帧开始
+		
 		while (!feof(fp))
 		{
 			fread(pBuffer, READ_BUF_SIZE, 1, fp);
@@ -192,6 +207,8 @@ int main()
 		//释放播放库端口号
 		PlayM4_FreePort(g_nPort);
 		cout << "***1" << endl;
+
+		i++;
 		if (fp != NULL)
 		{
 			fclose(fp);
@@ -202,8 +219,9 @@ int main()
 			delete[] pBuffer;
 			pBuffer = NULL;
 		}
-		return 0;
+		
 	}
+	return 0;
 }
 
 //-------------------------------------------------OpenCV------------------------------------------------------

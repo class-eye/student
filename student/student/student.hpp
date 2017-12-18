@@ -5,7 +5,8 @@
 #include "pose.hpp"
 #include "Timer.hpp"
 #include "fs.hpp"
-
+#include "incCn/HCNetSDK.h"  
+#include "incCn/PlayM4.h" 
 using namespace cv;
 using namespace caffe;
 struct Class_Info{
@@ -13,6 +14,7 @@ struct Class_Info{
 	bool all_disscussion_2 = false;
 	bool all_disscussion_4 = false;
 	int cur_frame;
+	PLAYM4_SYSTEM_TIME pstSystemTime_class;
 };
 struct Student_Info{
 	bool raising_hand=false;
@@ -37,9 +39,11 @@ struct Student_Info{
 	bool front=false;
 	bool back = false;
 	vector<Point2f>all_points;
+
+	PLAYM4_SYSTEM_TIME pstSystemTime;
 };
 //vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output);
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime);
 void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num);
 
 #endif

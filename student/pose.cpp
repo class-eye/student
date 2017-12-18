@@ -45,8 +45,8 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	shared_ptr<Blob> output_blobs = net.blob_by_name("Mconv7_stage6_L2");
 	shared_ptr<Blob> output_blobs1 = net.blob_by_name("Mconv7_stage6_L1");
 
-	output_blobs->cpu_data();
-	output_blobs1->cpu_data();
+	/*output_blobs->cpu_data();
+	output_blobs1->cpu_data();*/
 
 	vector<Mat>all_heatmap;	
 	const int bias1 = output_blobs->offset(0, 1, 0, 0);
