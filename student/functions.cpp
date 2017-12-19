@@ -153,183 +153,261 @@ bool greate3(Student_Info a, Student_Info b){
 
 //Json::Value root_all;
 
-//void class_Json(Json::Value &class_infomation, vector<Class_Info>&class_info_all, int &i,bool &activity, string &start_time, string &start_frame, int &activity_order,string &end_time){
-//	int negtive_num = 0;
-//	char buff[200];
-//	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay, class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
-//	if (i - 15 >= 0){
-//		for (int j = i - 15; j < i; j++){
-//			if (class_info_all[j].all_bow_head == false)negtive_num++;
-//		}
-//		if (negtive_num == 15){
-//			//start_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-//			start_time1 = buff;
-//			start_frame1 = class_info_all[i].cur_frame;
-//			activity_order1++;
-//		}
-//	}
-//	if (class_info_all[i].cur_frame - start_frame1 < 15){
-//		start_frame1 = class_info_all[i].cur_frame;
-//		//end_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-//		end_time1 = buff;
-//	}
-//}
+void class_Json(vector<Class_Info> &class_info_all, int &i,string &start_time, int &start_frame,int &end_frame, int &activity_order, string &end_time,int &negtive_num){
+	char buff[200];
+	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime.dwYear, class_info_all[i].pstSystemTime.dwMon, class_info_all[i].pstSystemTime.dwDay, class_info_all[i].pstSystemTime.dwHour, class_info_all[i].pstSystemTime.dwMin, class_info_all[i].pstSystemTime.dwSec);
+	if (negtive_num == 10){
+		start_time = buff;
+		start_frame = class_info_all[i].cur_frame;
+		end_frame = class_info_all[i].cur_frame;
+		activity_order+=2;
+	}
+	if (class_info_all[i].cur_frame - end_frame < 10){
+		end_frame = class_info_all[i].cur_frame;
+	
+		end_time = buff;
+	}
+}
+void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame,int &end_frame, int &activity_order, string &end_time, int &negtive_num){
+	char buff[200];
+	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", students_all[student_valid[i]][j].pstSystemTime.dwYear, students_all[student_valid[i]][j].pstSystemTime.dwMon, students_all[student_valid[i]][j].pstSystemTime.dwDay, students_all[student_valid[i]][j].pstSystemTime.dwHour, students_all[student_valid[i]][j].pstSystemTime.dwMin, students_all[student_valid[i]][j].pstSystemTime.dwSec);
+	
+	if (negtive_num == 3){
+		start_time = buff;
+		start_frame = students_all[student_valid[i]][j].cur_frame1;
+		end_frame = students_all[student_valid[i]][j].cur_frame1;
+		activity_order+=2;
+	}
+	if (students_all[student_valid[i]][j].cur_frame1 - end_frame < 3){
+		end_frame = students_all[student_valid[i]][j].cur_frame1;		
+		end_time = buff;
+	}
+}
+
 
 void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_all, vector<Class_Info>&class_info_all, string &output,int &n){
-	Json::Value root;
-	vector<string>human;
-	for (int i = 0; i < student_valid.size(); i++){
-		string human_x = "student" + to_string(student_valid[i]);
-		human.push_back(human_x);
-	}
 
-	//root["Frame"] = n;
-	string start_time1;
-	int start_frame1 = 0;
-	int activity_order1=0;
-	string end_time1;
-	string start_time2;
-	int start_frame2 = 0;
-	int activity_order2 = 0;
-	string end_time2;
-	string start_time3;
-	int start_frame3 = 0;
-	int activity_order3 = 0;
-	string end_time3;
-	
-	Json::Value class_infomation;
-
-	for (int i = 0; i < class_info_all.size(); i++){
-		//cout << to_string(class_info_all[i].pstSystemTime_class.dwYear) << class_info_all[i].pstSystemTime_class.dwMon << class_info_all[i].pstSystemTime_class.dwDay << class_info_all[i].pstSystemTime_class.dwHour << class_info_all[i].pstSystemTime_class.dwMin << class_info_all[i].pstSystemTime_class.dwSec << endl;
-		//class_Json(class_infomation, class_info_all, i, start_time1, start_frame1, activity_order1, end_time1);
-
-
-		if (class_info_all[i].all_bow_head == true){
-			int negtive_num=0;
-			char buff[200];
-			sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay,class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
-			if (i - 15 >= 0){
-				for (int j = i-15; j < i; j++){
-					if (class_info_all[j].all_bow_head == false)negtive_num++;
-				}
-				if (negtive_num == 15){
-					//start_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-					start_time1 = buff;
-					start_frame1 = class_info_all[i].cur_frame;
-					activity_order1++;
-				}
-			}	
-			if (class_info_all[i].cur_frame - start_frame1 < 15){
-				start_frame1 = class_info_all[i].cur_frame;
-				//end_time1 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-				end_time1 = buff;
-			}
-			string append_string = start_time1 + "  to  " + end_time1;
-	
-			class_infomation["all_bow_head"][activity_order1] = append_string;
-			//class_infomation["all_bow_head"].append(class_info_all[i].cur_frame);
-		}
-		if (class_info_all[i].all_disscussion_2 == true){
-			char buff[200];
-			sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay, class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
-			//sprintf(buff, "%s/%s/%s-%s:%s:%s", to_string(class_info_all[i].pstSystemTime_class.dwYear).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMon).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwDay).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwHour).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMin).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwSec).c_str());
-			int negtive_num = 0;
-			
-			if (i - 15 >= 0){
-				for (int j = i - 15; j < i; j++){
-					if (class_info_all[j].all_disscussion_2 == false)negtive_num++;
-				}
-				if (negtive_num == 15){
-					//start_time2 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-					start_time2 = buff;
-					start_frame2 = class_info_all[i].cur_frame;
-					activity_order2++;
-				}
-			}
-			
-			if (class_info_all[i].cur_frame - start_frame2 < 15){
-				start_frame2 = class_info_all[i].cur_frame;
-				end_time2 = buff;
-				//end_time2 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-			}
-			
-			string append_string = start_time2 + "  to  " + end_time2;
-			class_infomation["2-students'disscussion"][activity_order2] = append_string;
-			//class_infomation["2-students'disscussion"].append(class_info_all[i].cur_frame);
-		}
-		if (class_info_all[i].all_disscussion_4 == true){
-			char buff[200];
-			sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime_class.dwYear, class_info_all[i].pstSystemTime_class.dwMon, class_info_all[i].pstSystemTime_class.dwDay, class_info_all[i].pstSystemTime_class.dwHour, class_info_all[i].pstSystemTime_class.dwMin, class_info_all[i].pstSystemTime_class.dwSec);
-			//sprintf(buff, "%s/%s/%s-%s:%s:%s", to_string(class_info_all[i].pstSystemTime_class.dwYear).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMon).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwDay).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwHour).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwMin).c_str(), to_string(class_info_all[i].pstSystemTime_class.dwSec).c_str());
-			int negtive_num = 0;
-			if (i - 15 >= 0){
-				for (int j = i - 15; j < i; j++){
-					if (class_info_all[j].all_disscussion_4 == false)negtive_num++;
-				}
-				if (negtive_num == 15){
-					//start_time3 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-					start_time3 = buff;
-					start_frame3 = class_info_all[i].cur_frame;
-					activity_order3++;
-				}
-			}
-			if (class_info_all[i].cur_frame - start_frame3 < 15){
-				start_frame3 = class_info_all[i].cur_frame;
-				//end_time3 = class_info_all[i].pstSystemTime_class.dwYear + "/" + class_info_all[i].pstSystemTime_class.dwMon + "/" + class_info_all[i].pstSystemTime_class.dwDay + "---" + class_info_all[i].pstSystemTime_class.dwHour + ":" + class_info_all[i].pstSystemTime_class.dwMin + ":" + class_info_all[i].pstSystemTime_class.dwSec;
-				end_time3 = buff;
-			}
-			string append_string = start_time3 + "  to  " + end_time3;
-			class_infomation["4-students'disscussion"][activity_order3] = append_string;
-			//class_infomation["4-students'disscussion"].append(class_info_all[i].cur_frame);
-		}
-	}
-	root["class_infomation"] = Json::Value(class_infomation);
-
-	//for (int i = 0; i < student_valid.size(); i++){
-
-	//	Json::Value behavior_infomation;
-	//	behavior_infomation["max_energy"] = students_all[student_valid[i]][0].cur_frame1;
-	//	for (int j = 1; j < students_all[student_valid[i]].size(); j++){
-	//		if (students_all[student_valid[i]][j].bow_head == true){
-	//			behavior_infomation["bow_head"].append(students_all[student_valid[i]][j].cur_frame1);
-	//		}
-	//		if (students_all[student_valid[i]][j].daze == true){
-	//			behavior_infomation["daze"].append(students_all[student_valid[i]][j].cur_frame1);
-	//		}
-	//		if (students_all[student_valid[i]][j].raising_hand == true){
-	//			behavior_infomation["rasing_hand"].append(students_all[student_valid[i]][j].cur_frame1);
-	//		}
-	//		if (students_all[student_valid[i]][j].standing == true){
-	//			behavior_infomation["standing"].append(students_all[student_valid[i]][j].cur_frame1);
-	//		}
-	//	}
-	//	root[human[i]] = Json::Value(behavior_infomation);
-
-	//	/*if (students_all[student_valid[i]].size() == 1)continue;
-	//	else{
-	//		Json::Value student_loc;
-	//		for (int j = 0; j < 8; j++){
-	//			Json::Value part_loc;
-	//			int x = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].x;
-	//			int y = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].y;
-	//			part_loc.append(x);
-	//			part_loc.append(y);
-	//			student_loc["Parts'location"].append(part_loc);
-	//		}
-	//		root[human[i]] = Json::Value(student_loc);
-	//	}*/
-	//}
-	//root_all.append(root);
 	int pos1 = output.find_last_of("/");
 	int pos2 = output.find_last_of(".");
 	string videoname = output.substr(pos1, pos2 - pos1);
+
+	vector<string>start_time(7,"time");
+	vector<string>end_time(7,"time");
+	vector<int>start_frame(7,0);
+	vector<int>end_frame(7, 0);
+	vector<int>activity_order(7,0);
+
+	Json::Value root1;
+	Json::Value class_infomation;
+	
+	for (int i = 0; i < class_info_all.size(); i++){
+		
+		if (class_info_all[i].all_bow_head == true){
+			int negtive_num = 0;
+			if (i - 10 >= 0){
+				for (int j = i - 10; j < i; j++){
+					if (class_info_all[j].all_bow_head == false)negtive_num++;
+				}
+			}
+			else{
+				for (int j = 0; j < i; j++){
+					if (class_info_all[j].all_bow_head == false)negtive_num++;
+				}
+				if (negtive_num == i)negtive_num = 10;
+			}
+			class_Json(class_info_all, i, start_time[0], start_frame[0], end_frame[0], activity_order[0], end_time[0], negtive_num);
+			string append_string = start_time[0] + "  to  " + end_time[0];
+			string append_frame = to_string(start_frame[0]) + "  to  " + to_string(end_frame[0]);
+			
+			int a;
+			a = activity_order[0] >= 2 ? activity_order[0] : 2;
+			class_infomation["all_bow_head"][a - 2] = append_string;
+			class_infomation["all_bow_head"][a - 1] = append_frame;
+
+		}
+		if (class_info_all[i].all_disscussion_2 == true){
+			int negtive_num = 0;
+			if (i - 10 >= 0){
+				for (int j = i - 10; j < i; j++){
+					if (class_info_all[j].all_disscussion_2 == false)negtive_num++;
+				}
+			}
+			else{
+				for (int j = 0; j < i; j++){
+					if (class_info_all[j].all_disscussion_2 == false)negtive_num++;
+				}
+				if (negtive_num == i)negtive_num = 10;
+			}
+			class_Json(class_info_all, i, start_time[1], start_frame[1], end_frame[1], activity_order[1], end_time[1], negtive_num);
+			string append_string = start_time[1] + "  to  " + end_time[1];
+			string append_frame = to_string(start_frame[1]) + "  to  " + to_string(end_frame[1]);
+			int a;
+			a = activity_order[1] >= 2 ? activity_order[1] : 2;
+			class_infomation["all_disscussion_2"][a - 2] = append_string;
+			class_infomation["all_disscussion_2"][a - 1] = append_frame;
+		}
+		if (class_info_all[i].all_disscussion_4 == true){
+			int negtive_num = 0;
+			if (i - 10 >= 0){
+				for (int j = i - 10; j < i; j++){
+					if (class_info_all[j].all_disscussion_4 == false)negtive_num++;
+				}
+			}
+			else{
+				for (int j = 0; j < i; j++){
+					if (class_info_all[j].all_disscussion_4 == false)negtive_num++;
+				}
+				if (negtive_num == i)negtive_num = 10;
+			}
+			class_Json(class_info_all, i, start_time[2], start_frame[2], end_frame[2], activity_order[2], end_time[2], negtive_num);
+			string append_string = start_time[2] + "  to  " + end_time[2];
+			string append_frame = to_string(start_frame[2]) + "  to  " + to_string(end_frame[2]);
+			int a;
+			a = activity_order[2] >= 2 ? activity_order[2] : 2;
+			class_infomation["all_disscussion_4"][a - 2] = append_string;
+			class_infomation["all_disscussion_4"][a - 1] = append_frame;
+		}
+	}
+	root1["class_infomation"] = Json::Value(class_infomation);
+	
+	ofstream out1;
+	string jsonfile1 = output.substr(0, pos1) + "/" + videoname+"-Class" + ".json";
+	out1.open(jsonfile1);
+	Json::StyledWriter sw1;
+	out1 << sw1.write(root1);
+	out1.close();
+
+	//---------------------------------------------------------------------------------
+
+	vector<string>human;
+	for (int i = 0; i < student_valid.size(); i++){
+		string human_x = "Stu " + to_string(student_valid[i]);
+		human.push_back(human_x);
+	}
+	Json::Value root2;
+	Json::Value root3;
+	for (int i = 0; i < student_valid.size(); i++){
+		Json::Value student_loc;
+		for (int j = 0; j < 7; j++){
+			activity_order[j] = 0;
+			start_frame[j] = 0;
+			end_frame[j] = 0;
+			start_time[j] = "time";
+			end_time[j] = "time";
+		}
+		Json::Value behavior_infomation;
+		behavior_infomation["max_energy"] = students_all[student_valid[i]][0].cur_frame1;
+		
+		for (int j = 1; j < students_all[student_valid[i]].size(); j++){
+
+			
+			if (students_all[student_valid[i]][j].bow_head == true){
+				int negtive_num = 0;
+				if (j - 3 > 0){
+					for (int k = j - 3; k < j; k++){
+						if (students_all[student_valid[i]][k].bow_head == false)negtive_num++;
+					}
+				}
+				student_Json(students_all,student_valid, i, j, start_time[3], start_frame[3],end_frame[3],activity_order[3], end_time[3], negtive_num);
+				string append_string = start_time[3] + "  to  " + end_time[3];
+				string append_frame = to_string(start_frame[3]) + "  to  " + to_string(end_frame[3]);
+				int a;
+				a = activity_order[3] >= 2 ? activity_order[3] : 2;
+				behavior_infomation["bow_head"][a-2]=append_string;
+				behavior_infomation["bow_head"][a-1]=append_frame;
+			}
+		
+			if (students_all[student_valid[i]][j].daze == true){
+				int negtive_num = 0;
+				
+				if (j - 3 > 0){
+					for (int k = j - 3; k < j; k++){
+						if (students_all[student_valid[i]][k].daze == false)negtive_num++;
+					}
+				}				
+				student_Json(students_all, student_valid, i, j, start_time[4], start_frame[4], end_frame[4], activity_order[4], end_time[4], negtive_num);
+				string append_string = start_time[4] + "  to  " + end_time[4];
+				string append_frame = to_string(start_frame[4]) + "  to  " + to_string(end_frame[4]);
+				int a;
+				a = activity_order[4] >= 2 ? activity_order[4] : 2;
+				behavior_infomation["daze"][a - 2] = append_string;
+				behavior_infomation["daze"][a - 1] = append_frame;
+			}
+		
+			if (students_all[student_valid[i]][j].raising_hand == true){
+				int negtive_num = 0;
+				if (j - 3 > 0){
+					for (int k = j - 3; k < j; k++){
+						if (students_all[student_valid[i]][k].raising_hand == false)negtive_num++;
+					}
+				}
+				student_Json(students_all, student_valid, i, j, start_time[5], start_frame[5], end_frame[5], activity_order[5], end_time[5], negtive_num);
+				string append_string = start_time[5] + "  to  " + end_time[5];
+				string append_frame = to_string(start_frame[5]) + "  to  " + to_string(end_frame[5]);
+				int a;
+				a = activity_order[5] >= 2 ? activity_order[5] : 2;
+				behavior_infomation["raising_hand"][a - 2] = append_string;
+				behavior_infomation["raising_hand"][a - 1] = append_frame;
+			}
+		
+			if (students_all[student_valid[i]][j].standing == true){
+				int negtive_num = 0;
+				if (j - 3 > 0){
+					for (int k = j - 3; k < j; k++){
+						if (students_all[student_valid[i]][k].standing == false)negtive_num++;
+					}
+				}
+				student_Json(students_all, student_valid, i, j, start_time[6], start_frame[6], end_frame[6], activity_order[6], end_time[6], negtive_num);
+				string append_string = start_time[6] + "  to  " + end_time[6];
+				string append_frame = to_string(start_frame[6]) + "  to  " + to_string(end_frame[6]);
+				int a;
+				a = activity_order[6] >= 2 ? activity_order[6] : 2;
+				behavior_infomation["standing"][a - 2] = append_string;
+				behavior_infomation["standing"][a - 1] = append_frame;
+			}
+
+
+			//-------------------------------------------------
+			Json::Value student_rect;
+			student_rect.append(students_all[student_valid[i]][j].body_for_save.x);
+			student_rect.append(students_all[student_valid[i]][j].body_for_save.y);
+			student_rect.append(students_all[student_valid[i]][j].body_for_save.width);
+			student_rect.append(students_all[student_valid[i]][j].body_for_save.height);
+			student_loc.append(student_rect);
+			
+		}
+
+		root2[human[i]] = Json::Value(behavior_infomation);
+		root3[human[i]] = Json::Value(student_loc);
+
+
+		/*if (students_all[student_valid[i]].size() == 1)continue;
+		else{
+			Json::Value student_loc;
+			for (int j = 0; j < 8; j++){
+				Json::Value part_loc;
+				int x = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].x;
+				int y = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].y;
+				part_loc.append(x);
+				part_loc.append(y);
+				student_loc["Parts'location"].append(part_loc);
+			}
+			root[human[i]] = Json::Value(student_loc);
+		}*/
+	}
 	ofstream out;
-	string jsonfile = output.substr(0,pos1)+"/" + videoname + ".json";
+	string jsonfile = output.substr(0,pos1)+"/" +videoname +"-Stu"+ ".json";
 	out.open(jsonfile);
 	Json::StyledWriter sw;
-	out << sw.write(root);
+	out << sw.write(root2);
 	out.close();
 
+	ofstream out2;
+	string jsonfile2 = output.substr(0, pos1) + "/" + videoname + "-Rect" + ".json";
+	out2.open(jsonfile2);
+	Json::StyledWriter sw2;
+	out2 << sw2.write(root3);
+	out2.close();
 }
 void drawGrid(Mat &image, vector<int>student_valid,vector<vector<Student_Info>>students_all){
 	vector<vector<int>>orderr = { { 14, 3, 21, 19, 5, 17 }, { 15, 20, 2, 9, 12, 22, 24 }, { 7, 0, 1, 26, 50, 48 }, { 27, 4, 6, 32, 29, 49, 13 }, { 23, 41, 8, 34, 39, 35, 31 }, { 38, 43, 28, 10, 16, 42, 51 }, { 18, 37, 33, 30, 44, 40 }, {47,45,25,11,46,36} };

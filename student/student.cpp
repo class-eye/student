@@ -224,21 +224,30 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 				//----------------obtain a rect range for i person in a new frame---------------------
 				if (/*pose.subset[i][0] != -1&&*/pose.subset[i][1] != -1 && pose.subset[i][2] != -1 && pose.subset[i][5] != -1){
 
-					float wid1 = abs(pose.candicate[pose.subset[i][1]][0] - pose.candicate[pose.subset[i][2]][0]);
-					float wid2 = abs(pose.candicate[pose.subset[i][1]][0] - pose.candicate[pose.subset[i][5]][0]);
+					float wid1 = abs(x[1] - x[2]);
+					float wid2 = abs(x[1] - x[5]);
 					float wid = MAX(wid1, wid2);
 					if (wid == 0)continue;
+	
+					Rect rect_for_save;
+					rect_for_save.x = x[1] - wid-5;
+					rect_for_save.y = y[1] - (wid1 + wid2 - 5);
+					rect_for_save.width = wid1 + wid2+10;
+					rect_for_save.height = 2*(wid1 + wid2 - 5);
+					if (rect_for_save.height < 5)rect_for_save.height = 15;
+					//cv::rectangle(image, rect_for_save, Scalar(0, 255, 0), 2, 8, 0);
+					student_info.body_for_save = rect_for_save;
 
 					Rect cur_rect;
 					if (student_info.arm_vertical){
-						cur_rect.x = pose.candicate[pose.subset[i][1]][0] - wid-5;
-						cur_rect.y = pose.candicate[pose.subset[i][1]][1];
+						cur_rect.x = x[1] - wid-5;
+						cur_rect.y = y[1];
 						cur_rect.width = wid1 + wid2+10;
 						cur_rect.height = wid1 + wid2 -15+ 40;
 					}
 					else{
-						cur_rect.x = pose.candicate[pose.subset[i][1]][0] - wid;
-						cur_rect.y = pose.candicate[pose.subset[i][1]][1];
+						cur_rect.x = x[1] - wid;
+						cur_rect.y = y[1];
 						cur_rect.width = wid1 + wid2;
 						cur_rect.height = wid1 + wid2 - 15;
 						if (cur_rect.height < 5)cur_rect.height = 15;
@@ -246,14 +255,13 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					refine(cur_rect, image);
 
 					//cv::rectangle(image, cur_rect, Scalar(0, 255, 0), 2, 8, 0);
-
 					student_info.body_bbox = cur_rect;
 					if (cur_rect.y < image.size().height*0.3 && cur_rect.height>80){
 						cur_rect = Rect(0, 0, 1, 1);
 					}
-					student_info.neck_loc = Point2f(pose.candicate[pose.subset[i][1]][0], pose.candicate[pose.subset[i][1]][1]);
+					student_info.neck_loc = Point2f(x[1], y[1]);
 					if (pose.subset[i][0] != -1){
-						student_info.loc = Point2f(pose.candicate[pose.subset[i][0]][0], pose.candicate[pose.subset[i][0]][1]);
+						student_info.loc = Point2f(x[0], y[0]);
 						student_info.front = true;
 					}
 					else{

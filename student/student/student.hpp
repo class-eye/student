@@ -13,8 +13,8 @@ struct Class_Info{
 	bool all_bow_head=false;
 	bool all_disscussion_2 = false;
 	bool all_disscussion_4 = false;
-	int cur_frame;
-	PLAYM4_SYSTEM_TIME pstSystemTime_class;
+	int cur_frame=0;
+	PLAYM4_SYSTEM_TIME pstSystemTime;
 };
 struct Student_Info{
 	bool raising_hand=false;
@@ -31,14 +31,15 @@ struct Student_Info{
 	Point2f loc;
 	Point2f neck_loc;
 	Rect body_bbox;
-	string output_body_dir;
-	int cur_frame1;
+	Rect body_for_save;
+	//string output_body_dir;
+	int cur_frame1=0;
 	int cur_size = 0;
 	int energy = 0;
 	int max_energy = 0;
 	bool front=false;
 	bool back = false;
-	vector<Point2f>all_points;
+	//vector<Point2f>all_points;
 
 	PLAYM4_SYSTEM_TIME pstSystemTime;
 };

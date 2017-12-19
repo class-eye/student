@@ -13,7 +13,7 @@ using namespace std;
 void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, vector<Class_Info> &class_info_all, Mat &image, int &n, PLAYM4_SYSTEM_TIME &pstSystemTime,int &num_turn_body){
 	Class_Info class_info;
 	class_info.cur_frame = n;
-	class_info.pstSystemTime_class = pstSystemTime;
+	class_info.pstSystemTime = pstSystemTime;
 	string status1 = "Raising hand";
 	string status2 = "Standing";
 	string status3 = "2-Disscussion";
@@ -29,8 +29,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 
 		if (students_all[student_valid[j]][0].cur_size != students_all[student_valid[j]].size()){
 			students_all[student_valid[j]][0].cur_size = students_all[student_valid[j]].size();
-			int x1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.x;
-			int y1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.y;
+			
 			int x2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.x;
 			int y2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y;
 
@@ -95,12 +94,12 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 
 				//------------------判断低头-----------------------------------
 				int count2 = 0;
-				if (students_all[student_valid[j]].size() > 10){
-					for (int k = students_all[student_valid[j]].size() - 10; k < students_all[student_valid[j]].size(); k++){
+				if (students_all[student_valid[j]].size() > 7){
+					for (int k = students_all[student_valid[j]].size() - 7; k < students_all[student_valid[j]].size(); k++){
 						if (students_all[student_valid[j]][k].bow_head_tmp == true)count2++;
 					}
 				}
-				if (count2 >= 4)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = true;
+				if (count2 >= 3)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = true;
 				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = false;
 				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
 					num_of_bowhead++;
@@ -163,25 +162,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 					}
 				}
 			}
-			//--------------------------------个体行为------------------------------------------------
-
-			//----------------如果发呆----------------------------
-			/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze == true){
-				cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
-			}*/
-			//---------------如果起立-----------------------------
-			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
-				cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
-			}
-			//----------------如果低头----------------------------
-
-			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
-				cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
-			}
-			//-----------------如果举手-----------------------------
-			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
-				cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 0.7);
-			}
+			
 		}
 	}//for (int j = 0; j < student_valid.size(); j++) end
 
@@ -192,8 +173,11 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 	else if (num_of_disscuss >= 10){
 		class_info.all_disscussion_2 = true;
 	}
-	if (num_of_bowhead >= 13 && num_of_back<7 && num_of_disscuss<10){
+	if (num_of_bowhead >= 10 && num_of_back<7 && num_of_disscuss<10){
 		class_info.all_bow_head = true;
+		for (int j = 0; j < student_valid.size(); j++){
+			students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == false;
+		}
 	}
 	//----------------如果讨论--------------------------
 	if (class_info.all_disscussion_2 == true){
@@ -207,13 +191,37 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 		cv::putText(image, status5, cv::Point2f(image.size[1] / 2, 70), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 255), 1);
 	}
 
+	//--------------------------------个体行为------------------------------------------------
+	for (int j = 0; j < student_valid.size(); j++){
+		int x1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.x;
+		int y1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.y;
+		//----------------如果发呆----------------------------
+		/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze == true){
+		cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
+		}*/
+		//---------------如果起立-----------------------------
+		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
+			cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
+		}
+		//----------------如果低头----------------------------
+
+		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head == true){
+			cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
+		}
+		//-----------------如果举手-----------------------------
+		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
+			cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 0.7);
+		}
+	}
+
+
 
 	/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion == true){
 	cv::putText(image, status3, cv::Point2f(x1, y1), FONT_HERSHEY_DUPLEX, 0.5, Scalar(0, 255, 255), 1);
 	}*/
 	class_info_all.push_back(class_info);
 	char buff[100];
-	if (num_of_bowhead >= 13){
+	if (num_of_bowhead >= 10){
 		sprintf(buff, "bow_head: %d", num_of_bowhead);
 		cv::putText(image, buff, cv::Point2f(10, image.size().height - 110), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
 	}
@@ -221,14 +229,14 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 		sprintf(buff, "bow_head: %d", 0);
 		cv::putText(image, buff, cv::Point2f(10, image.size().height - 110), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
 	}
-	if (num_of_back >= 6){
+	if (num_of_back >= 7){
 		int disscuss_people = 2 * num_of_back;
 		sprintf(buff, "4-students'discussion: %d", disscuss_people);
 		cv::putText(image, buff, cv::Point2f(10, image.size().height - 50), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
 		sprintf(buff, "2-students'discussion: %d", 0);
 		cv::putText(image, buff, cv::Point2f(10, image.size().height - 80), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
 	}
-	else if (num_of_disscuss >= 8){
+	else if (num_of_disscuss >= 10){
 		int disscuss_people = num_of_disscuss;
 		sprintf(buff, "4-students'discussion: %d", 0);
 		cv::putText(image, buff, cv::Point2f(10, image.size().height - 50), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 255), 1);
