@@ -303,7 +303,10 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 		
 		//----------------------·ÖÎöĞĞÎª------------------------------
 		Analys_Behavior(students_all, student_valid, class_info_all, image, n, pstSystemTime,num_turn_body);
-		writeJson(student_valid, students_all, class_info_all, output, n);
+		//timer.Tic();
+		writeJson(student_valid, students_all, class_info_all, output, n);	
+		/*timer.Toc();
+		cout << "writeJson cost " << timer.Elasped() / 1000.0 << " s" << endl;*/
 		//drawGrid(image,student_valid,students_all);
 
 		string output1;
