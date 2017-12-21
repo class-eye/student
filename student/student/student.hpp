@@ -41,6 +41,7 @@ struct Student_Info{
 	int max_energy = 0;
 	bool front=false;
 	bool back = false;
+	vector<int>miss_frame;
 	//vector<Point2f>all_points;
 
 	PLAYM4_SYSTEM_TIME pstSystemTime;
