@@ -22,6 +22,7 @@ struct Student_Info{
 	bool disscussion= false;
 	bool daze = false;
 	bool bow_head = false;
+	bool bow_head_each = false;
 
 	bool turn_head = false;
 	bool arm_vertical = false;
@@ -33,6 +34,7 @@ struct Student_Info{
 	Rect body_bbox;
 	Rect body_for_save;
 	//string output_body_dir;
+	int away_from_seat = 0;
 	int cur_frame1=0;
 	int cur_size = 0;
 	int energy = 0;

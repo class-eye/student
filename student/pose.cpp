@@ -24,7 +24,8 @@ bool greate(vector<float>a, vector<float>b){
 }
 PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	Timer timer;
-	float scale = 2.0*368.0 / oriImg.size[0];
+	float scale = 2.3*368.0 / oriImg.size[0];
+
 	Mat imagetotest;
 	cv::resize(oriImg, imagetotest, Size(0, 0), scale, scale);
 	vector<Mat> bgr;

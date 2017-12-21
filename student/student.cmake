@@ -2,6 +2,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 set(SRC ${CMAKE_CURRENT_LIST_DIR}/student.cpp
 		${CMAKE_CURRENT_LIST_DIR}/pose.cpp  
 		${CMAKE_CURRENT_LIST_DIR}/fs.cpp  
+		${CMAKE_CURRENT_LIST_DIR}/Timer.cpp 
 		${CMAKE_CURRENT_LIST_DIR}/behavior.cpp  
 		${CMAKE_CURRENT_LIST_DIR}/functions.cpp  
 		${CMAKE_CURRENT_LIST_DIR}/student/functions.hpp

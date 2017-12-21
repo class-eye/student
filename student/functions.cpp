@@ -283,14 +283,10 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 	Json::StyledWriter sw1;
 	out1 << sw1.write(root1);
 	out1.close();
-	vector<Point>ss(4);
-	//---------------------------------------------------------------------------------
 
-	vector<string>human;
-	for (int i = 0; i < student_valid.size(); i++){
-		string human_x = "Stu " + to_string(student_valid[i]);
-		human.push_back(human_x);
-	}
+	//---------------------------------------------------------------------------------
+	vector<Point>ss(4);
+	
 	Json::Value root2;
 	Json::Value root3;
 	for (int i = 0; i < student_valid.size(); i++){
@@ -313,20 +309,20 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 
 		Json::Value all_rect;
 		all_rect["ID"] = student_valid[i];
-
+		
 		for (int j = 1; j < students_all[student_valid[i]].size(); j++){
 			
-			if (students_all[student_valid[i]][j].bow_head == true){
+			if (students_all[student_valid[i]][j].bow_head_each == true){
 
 				int negtive_num = 0;
 				if (j - 3 > 0){
 					for (int k = j - 3; k < j; k++){
-						if (students_all[student_valid[i]][k].bow_head == false)negtive_num++;
+						if (students_all[student_valid[i]][k].bow_head_each == false)negtive_num++;
 					}
 				}
 				else{
-					for (int k = 0; k < j; j++){
-						if (students_all[student_valid[i]][k].bow_head == false)negtive_num++;
+					for (int k = 0; k < j; k++){
+						if (students_all[student_valid[i]][k].bow_head_each == false)negtive_num++;
 					}
 					if (negtive_num == j)negtive_num = 3;
 				}
@@ -362,7 +358,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 				}
 				else{
-					for (int k = 0; k < j; j++){
+					for (int k = 0; k < j; k++){
 						if (students_all[student_valid[i]][k].daze == false)negtive_num++;
 					}
 					if (negtive_num == j)negtive_num = 3;
@@ -397,7 +393,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 				}
 				else{
-					for (int k = 0; k < j; j++){
+					for (int k = 0; k < j; k++){
 						if (students_all[student_valid[i]][k].raising_hand == false)negtive_num++;
 					}
 					if (negtive_num == j)negtive_num = 3;
@@ -432,7 +428,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 				}
 				else{
-					for (int k = 0; k < j; j++){
+					for (int k = 0; k < j; k++){
 						if (students_all[student_valid[i]][k].standing == false)negtive_num++;
 					}
 					if (negtive_num == j)negtive_num = 3;
@@ -458,9 +454,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				}
 				all_rect["standing"][a - 1] = Json::Value(student_loc);
 			}
-		
-
-
+			
 			//-------------------------------------------------
 			/*Json::Value student_rect;
 			student_rect.append(students_all[student_valid[i]][j].body_for_save.x);
