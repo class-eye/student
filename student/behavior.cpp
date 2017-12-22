@@ -44,7 +44,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 				}*/
 			}
 			else{
-				/*int k1 = students_all[student_valid[j]].size() - 5;
+				int k1 = students_all[student_valid[j]].size() - 5;
 
 				if (students_all[student_valid[j]][k1].front == true && students_all[student_valid[j]][k1 + 1].front == true && students_all[student_valid[j]][k1 + 2].front == true && students_all[student_valid[j]][k1 + 3].front == true && students_all[student_valid[j]][k1 + 4].front == true)
 				{
@@ -56,7 +56,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 					for (int k = students_all[student_valid[j]].size() - 5; k < students_all[student_valid[j]].size() - 1; k++){
 						line(image, students_all[student_valid[j]][k].neck_loc, students_all[student_valid[j]][k + 1].neck_loc, cv::Scalar(255, 0, 0), 2, 8, 0);
 					}
-				}*/
+				}
 
 				//-------------------收集5s内的信息---------------------------
 
@@ -118,13 +118,13 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].standing == true && students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].arm_vertical == true){
 					float dis = abs(students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].loc.y - students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y);
 					if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y < image.size().height / 5)thre1 = 10;
-					else thre1 = max_width * 4 / 5;
+					else thre1 = max_width * 3 / 4;
 					if (dis < thre1)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing = true;
 				}
 
 				int thre = 4;
 				int cur_y = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y;
-				if (cur_y < 200)thre = 2;			
+				if (cur_y < 200)thre = 3;			
 				//-------------------累积能量--------------------------------
 				Point2f pre_loc = students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].loc;
 				Point2f cur_loc = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc;
@@ -166,9 +166,10 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 			
 		}
 		else{
+			students_all[student_valid[j]][0].miss_frame.push_back(n);
 			students_all[student_valid[j]][0].away_from_seat++;
 			offseat_num++;
-			if (offseat_num >= 7 || students_all[student_valid[j]][0].away_from_seat>=5){
+			if (offseat_num >= 7 || students_all[student_valid[j]][0].away_from_seat>=15){
 				students_all[student_valid[j]][0].energy = 0;
 				students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = false;
 				students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head_each = false;

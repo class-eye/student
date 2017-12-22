@@ -118,7 +118,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					else{
 						x[j] = pose.candicate[pose.subset[i][j]][0];
 						y[j] = pose.candicate[pose.subset[i][j]][1];
-					}			
+					}
 					//student_info.all_points.push_back(Point2f(x[j], y[j]));
 				}
 
@@ -135,16 +135,16 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 						/*float longer_width = max(abs(x[5] - x[2]), abs(x[7] - x[4]));
 						float shorter_width = min(abs(x[5] - x[2]), abs(x[7] - x[4]));*/
 						//if (shorter_limb / longer_limb > 0.75/* && shorter_width / longer_width > 0.7*/){
-							if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
-								if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135 && angle_l > 115)){
-									Vertical_r = true;
-								}
+						if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
+							if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135/* && angle_l > 115*/)){
+								Vertical_r = true;
 							}
-							if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
-								if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135 && angle_r > 115)){
-									Vertical_l = true;
-								}
+						}
+						if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
+							if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135/* && angle_r > 115*/)){
+								Vertical_l = true;
 							}
+						}
 						//}
 					}
 					if ((Vertical_r || Vertical_l)){
@@ -159,22 +159,19 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 						if (y[4] <= y[3] && y[3] <= y[2] && (y[3] - y[4] > 10)){
 							symbol_raise = 1;
 						}
-						else if (y[2]-y[4]>10)symbol_raise = 1;
+						else if (y[2] >= y[4])symbol_raise = 1;
+						else if (y[3] - y[4] >= abs(y[2] - y[4]) * 4)symbol_raise = 1;
 					}
 					if (pose.subset[i][7] != -1 && pose.subset[i][6] != -1 && pose.subset[i][5] != -1){
 						if (y[7] <= y[6] && y[6] <= y[5] && (y[6] - y[7] > 10)){
 							symbol_raise = 1;
 						}
-						else if (y[5]-y[7]>10)symbol_raise = 1;
+						else if (y[5] >= y[7])symbol_raise = 1;
+						else if (y[6] - y[7] >= abs(y[5] - y[7]) * 4)symbol_raise = 1;
 					}
 				}
-				
-				/*if (pose.subset[i][0] != -1 && pose.subset[i][1] != -1 && pose.subset[i][4] != -1){
-					if (y[0] < y[1] && y[4] < y[0] && (y[0] - y[4])>10)symbol_raise = 1;
-					}
-					if (pose.subset[i][0] != -1 && pose.subset[i][1] != -1 && pose.subset[i][7] != -1){
-					if (y[0] < y[1] && y[7] < y[0] && (y[0] - y[7])>10)symbol_raise = 1;
-					}*/
+
+
 				if (symbol_raise == 1){    //如果举手
 					student_info.raising_hand = true;
 				}
@@ -228,22 +225,22 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					float wid2 = abs(x[1] - x[5]);
 					float wid = MAX(wid1, wid2);
 					if (wid == 0)continue;
-	
+
 					Rect rect_for_save;
-					rect_for_save.x = x[1] - wid-5;
+					rect_for_save.x = x[1] - wid - 5;
 					rect_for_save.y = y[1] - (wid1 + wid2 - 5);
-					rect_for_save.width = wid1 + wid2+10;
-					rect_for_save.height = 2*(wid1 + wid2 - 5);
+					rect_for_save.width = wid1 + wid2 + 10;
+					rect_for_save.height = 2 * (wid1 + wid2 - 5);
 					if (rect_for_save.height < 5)rect_for_save.height = 15;
 					//cv::rectangle(image, rect_for_save, Scalar(0, 255, 0), 2, 8, 0);
 					student_info.body_for_save = rect_for_save;
 
 					Rect cur_rect;
 					if (student_info.arm_vertical){
-						cur_rect.x = x[1] - wid-5;
+						cur_rect.x = x[1] - wid - 5;
 						cur_rect.y = y[1];
-						cur_rect.width = wid1 + wid2+10;
-						cur_rect.height = wid1 + wid2 -15+ 40;
+						cur_rect.width = wid1 + wid2 + 10;
+						cur_rect.height = wid1 + wid2 - 15 + 40;
 					}
 					else{
 						cur_rect.x = x[1] - wid;
@@ -289,6 +286,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 						students_all[69].push_back(student_info);
 					}
 				}
+
 				/*for (int j = 0; j < 8; j++){
 					if (!(x[j] || y[j])){
 						continue;
@@ -297,6 +295,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 						cv::circle(image, Point2f(x[j], y[j]), 3, cv::Scalar(color[j][0], color[j][1], color[j][2]), -1);
 					}
 				}*/
+
 			} //if (pose.subset[i][19] >= 3 && score >= 0.4) end
 		}//for (int i = 0; i < pose.subset.size(); i++) end
 

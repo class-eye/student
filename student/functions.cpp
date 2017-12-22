@@ -153,7 +153,7 @@ bool greate3(Student_Info a, Student_Info b){
 
 //Json::Value root_all;
 
-void class_Json(vector<Class_Info> &class_info_all, int &i,string &start_time, int &start_frame,int &end_frame, int &activity_order, string &end_time,int &negtive_num){
+void class_Json(vector<Class_Info> &class_info_all, int &i, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Json::Value &class_infomation,string &dongzuo){
 	char buff[200];
 	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime.dwYear, class_info_all[i].pstSystemTime.dwMon, class_info_all[i].pstSystemTime.dwDay, class_info_all[i].pstSystemTime.dwHour, class_info_all[i].pstSystemTime.dwMin, class_info_all[i].pstSystemTime.dwSec);
 	if (negtive_num == 10){
@@ -164,11 +164,17 @@ void class_Json(vector<Class_Info> &class_info_all, int &i,string &start_time, i
 	}
 	if (class_info_all[i].cur_frame - end_frame < 10){
 		end_frame = class_info_all[i].cur_frame;
-	
 		end_time = buff;
 	}
+	string append_string = "(" + start_time + "," + end_time + ")";
+	string append_frame = "(" + to_string(start_frame) + "," + to_string(end_frame) + ")";
+	int a;
+	a = activity_order >= 2 ? activity_order : 2;
+	class_infomation[dongzuo][a - 2] = append_string;
+	class_infomation[dongzuo][a - 1] = append_frame;
+
 }
-void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame,int &end_frame, int &activity_order, string &end_time, int &negtive_num,Point &ss){
+void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Point &ss, Json::Value &behavior_infomation,Json::Value &all_rect,string &dongzuo){
 	
 	char buff[200];
 	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", students_all[student_valid[i]][j].pstSystemTime.dwYear, students_all[student_valid[i]][j].pstSystemTime.dwMon, students_all[student_valid[i]][j].pstSystemTime.dwDay, students_all[student_valid[i]][j].pstSystemTime.dwHour, students_all[student_valid[i]][j].pstSystemTime.dwMin, students_all[student_valid[i]][j].pstSystemTime.dwSec);
@@ -186,8 +192,54 @@ void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student
 		end_frame = students_all[student_valid[i]][j].cur_frame1;	
 		ss.y = j;
 		end_time = buff;
+	}	
+	vector<int>msf;
+	for (int l = 0; l < students_all[student_valid[i]][0].miss_frame.size(); l++){
+		if (students_all[student_valid[i]][0].miss_frame[l]>start_frame && students_all[student_valid[i]][0].miss_frame[l] < end_frame)
+			msf.push_back(students_all[student_valid[i]][0].miss_frame[l]);
 	}
-	
+	/*string miss_f = " ";
+	for (int l = 0; l < msf.size(); l++){
+		if (l == 0){
+			miss_f = "[";
+		}
+		miss_f += to_string(msf[l]);
+		if (l == msf.size() - 1){
+			miss_f += "]";
+		}
+		else miss_f += ",";
+	}*/
+	string append_string = "(" + start_time + "," + end_time + ")";
+	string append_frame = "(" + to_string(start_frame) + "," + to_string(end_frame) + ")";
+
+	int a;
+	a = activity_order >= 2 ? activity_order : 2;	
+	behavior_infomation[dongzuo][a - 2] = append_frame;
+	behavior_infomation[dongzuo][a - 1] = append_string;
+	//----------------------------------------------------
+	all_rect[dongzuo][a - 2] = /*miss_f != " " ? append_frame + "," + miss_f : */append_frame;
+	Json::Value student_loc;
+	int count = 0;
+	for (int k = start_frame; k <= end_frame; k++){
+		Json::Value student_rect;
+		auto iter = find(msf.begin(), msf.end(), k);
+		if (iter != msf.end()){
+			student_rect.append(0);
+			student_rect.append(0);
+			student_rect.append(0);
+			student_rect.append(0);
+		}
+		else{
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.x);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.y);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.width);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.height);
+			count++;
+		}
+		student_loc.append(student_rect);
+	}
+	all_rect[dongzuo][a - 1] = Json::Value(student_loc);
+
 }
 
 
@@ -221,14 +273,8 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				}
 				if (negtive_num == i)negtive_num = 10;
 			}
-			class_Json(class_info_all, i, start_time[0], start_frame[0], end_frame[0], activity_order[0], end_time[0], negtive_num);
-			string append_string = "("+start_time[0] + "," + end_time[0]+")";
-			string append_frame ="("+ to_string(start_frame[0]) + "," + to_string(end_frame[0])+")";
-			
-			int a;
-			a = activity_order[0] >= 2 ? activity_order[0] : 2;
-			class_infomation["all_bow_head"][a - 2] = append_string;
-			class_infomation["all_bow_head"][a - 1] = append_frame;
+			string dongzuo = "all_bow_head";
+			class_Json(class_info_all, i, start_time[0], start_frame[0], end_frame[0], activity_order[0], end_time[0], negtive_num, class_infomation,dongzuo);
 
 		}
 		if (class_info_all[i].all_disscussion_2 == true){
@@ -244,13 +290,8 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				}
 				if (negtive_num == i)negtive_num = 10;
 			}
-			class_Json(class_info_all, i, start_time[1], start_frame[1], end_frame[1], activity_order[1], end_time[1], negtive_num);
-			string append_string = "(" + start_time[1] + "," + end_time[1] + ")";
-			string append_frame = "(" + to_string(start_frame[1]) + "," + to_string(end_frame[1]) + ")";
-			int a;
-			a = activity_order[1] >= 2 ? activity_order[1] : 2;
-			class_infomation["all_disscussion_2"][a - 2] = append_string;
-			class_infomation["all_disscussion_2"][a - 1] = append_frame;
+			string dongzuo = "all_disscussion_2";
+			class_Json(class_info_all, i, start_time[1], start_frame[1], end_frame[1], activity_order[1], end_time[1], negtive_num, class_infomation, dongzuo);
 
 		}
 		if (class_info_all[i].all_disscussion_4 == true){
@@ -266,13 +307,8 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				}
 				if (negtive_num == i)negtive_num = 10;
 			}
-			class_Json(class_info_all, i, start_time[2], start_frame[2], end_frame[2], activity_order[2], end_time[2], negtive_num);
-			string append_string = "(" + start_time[2] + "," + end_time[2] + ")";
-			string append_frame = "(" + to_string(start_frame[2]) + "," + to_string(end_frame[2]) + ")";
-			int a;
-			a = activity_order[2] >= 2 ? activity_order[2] : 2;
-			class_infomation["all_disscussion_4"][a - 2] = append_string;
-			class_infomation["all_disscussion_4"][a - 1] = append_frame;
+			string dongzuo = "all_disscussion_4";
+			class_Json(class_info_all, i, start_time[2], start_frame[2], end_frame[2], activity_order[2], end_time[2], negtive_num, class_infomation, dongzuo);
 		}
 	}
 	root1["class_infomation"] = Json::Value(class_infomation);
@@ -326,47 +362,8 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 					if (negtive_num == j)negtive_num = 3;
 				}
-				student_Json(students_all, student_valid, i, j, start_time[3], start_frame[3], end_frame[3], activity_order[3], end_time[3], negtive_num,ss[0]);
-
-				vector<int>msf;
-				for (int l = 0; l < students_all[student_valid[i]][0].miss_frame.size(); l++){
-					if (students_all[student_valid[i]][0].miss_frame[l]>start_frame[3] && students_all[student_valid[i]][0].miss_frame[l] < end_frame[3])
-						msf.push_back(students_all[student_valid[i]][0].miss_frame[l]);
-				}
-				string miss_f = " ";
-				for (int l = 0; l < msf.size(); l++){
-					if (l == 0){
-						miss_f = "[";
-					}
-					miss_f += to_string(msf[l]);
-					if (l == msf.size() - 1){
-						miss_f += "]";
-					}
-					else miss_f += ",";
-				}
-				string append_string = "(" + start_time[3] + "," + end_time[3] + ")";
-				string append_frame = "(" + to_string(start_frame[3]) + "," + to_string(end_frame[3]) + ")";
-				int a;
-				a = activity_order[3] >= 2 ? activity_order[3] : 2;
-				behavior_infomation["bow_head"][a - 2].append(append_string);
-				
-				behavior_infomation["bow_head"][a - 1] = append_frame;
-				//----------------------------------------------------
-				all_rect["bow_head"][a - 2] = miss_f != " " ? append_frame +","+ miss_f : append_frame;
-
-				Json::Value student_loc;
-
-				for (int k = ss[0].x; k <= ss[0].y; k++){
-					
-					Json::Value student_rect;
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.x);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.y);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.width);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.height);
-					student_loc.append(student_rect);
-				}
-				all_rect["bow_head"][a - 1] = Json::Value(student_loc);
-
+				string dongzuo = "bow_head";
+				student_Json(students_all, student_valid, i, j, start_time[3], start_frame[3], end_frame[3], activity_order[3], end_time[3], negtive_num, ss[0], behavior_infomation, all_rect,dongzuo);
 			}
 		
 			if (students_all[student_valid[i]][j].daze == true){
@@ -383,44 +380,9 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 					if (negtive_num == j)negtive_num = 3;
 				}
-				student_Json(students_all, student_valid, i, j, start_time[4], start_frame[4], end_frame[4], activity_order[4], end_time[4], negtive_num,ss[1]);
 
-				vector<int>msf;
-				for (int l = 0; l < students_all[student_valid[i]][0].miss_frame.size(); l++){
-					if (students_all[student_valid[i]][0].miss_frame[l]>start_frame[4] && students_all[student_valid[i]][0].miss_frame[l] < end_frame[4])
-						msf.push_back(students_all[student_valid[i]][0].miss_frame[l]);
-				}
-				string miss_f = " ";
-				for (int l = 0; l < msf.size(); l++){
-					if (l == 0){
-						miss_f = "[";
-					}
-					miss_f += to_string(msf[l]);
-					if (l == msf.size() - 1){
-						miss_f += "]";
-					}
-					else miss_f += ",";
-				}
-
-				string append_string = "(" + start_time[4] + "," + end_time[4] + ")";
-				string append_frame = "(" + to_string(start_frame[4]) + "," + to_string(end_frame[4]) + ")";
-				int a;
-				a = activity_order[4] >= 2 ? activity_order[4] : 2;
-				behavior_infomation["daze"][a - 2] = append_string;
-				behavior_infomation["daze"][a - 1] = append_frame;
-				//----------------------------------------------------
-				all_rect["daze"][a - 2] = miss_f != " " ? append_frame + "," + miss_f : append_frame;
-				Json::Value student_loc;
-				for (int k = ss[1].x; k <= ss[1].y; k++){
-					Json::Value student_rect;
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.x);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.y);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.width);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.height);
-					student_loc.append(student_rect);
-				}
-				all_rect["daze"][a - 1] = Json::Value(student_loc);
-
+				string dongzuo = "daze";
+				student_Json(students_all, student_valid, i, j, start_time[4], start_frame[4], end_frame[4], activity_order[4], end_time[4], negtive_num, ss[1], behavior_infomation, all_rect, dongzuo);
 			}
 		
 			if (students_all[student_valid[i]][j].raising_hand == true){
@@ -436,44 +398,8 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 					if (negtive_num == j)negtive_num = 3;
 				}
-				student_Json(students_all, student_valid, i, j, start_time[5], start_frame[5], end_frame[5], activity_order[5], end_time[5], negtive_num,ss[2]);
-
-				vector<int>msf;
-				for (int l = 0; l < students_all[student_valid[i]][0].miss_frame.size(); l++){
-					if (students_all[student_valid[i]][0].miss_frame[l]>start_frame[5] && students_all[student_valid[i]][0].miss_frame[l] < end_frame[5])
-						msf.push_back(students_all[student_valid[i]][0].miss_frame[l]);
-				}
-				string miss_f = " ";
-				for (int l = 0; l < msf.size(); l++){
-					if (l == 0){
-						miss_f = "[";
-					}
-					miss_f += to_string(msf[l]);
-					if (l == msf.size() - 1){
-						miss_f += "]";
-					}
-					else miss_f += ",";
-				}
-
-				string append_string = "(" + start_time[5] + "," + end_time[5] + ")";
-				string append_frame = "(" + to_string(start_frame[5]) + "," + to_string(end_frame[5]) + ")";
-				int a;
-				a = activity_order[5] >= 2 ? activity_order[5] : 2;
-				behavior_infomation["raising_hand"][a - 2] = append_string;
-				behavior_infomation["raising_hand"][a - 1] = append_frame;
-				//----------------------------------------------------
-				all_rect["raising_hand"][a - 2] = miss_f != " " ? append_frame + "," + miss_f : append_frame;
-				Json::Value student_loc;
-				for (int k = ss[2].x; k <= ss[2].y; k++){
-					Json::Value student_rect;
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.x);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.y);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.width);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.height);
-					student_loc.append(student_rect);
-				}
-				all_rect["raising_hand"][a - 1] = Json::Value(student_loc);
-
+				string dongzuo = "raising_hand";
+				student_Json(students_all, student_valid, i, j, start_time[5], start_frame[5], end_frame[5], activity_order[5], end_time[5], negtive_num, ss[2], behavior_infomation, all_rect, dongzuo);
 			}
 		
 			if (students_all[student_valid[i]][j].standing == true){
@@ -489,72 +415,14 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 					if (negtive_num == j)negtive_num = 3;
 				}
-				student_Json(students_all, student_valid, i, j, start_time[6], start_frame[6], end_frame[6], activity_order[6], end_time[6], negtive_num,ss[3]);
-
-				vector<int>msf;
-				for (int l = 0; l < students_all[student_valid[i]][0].miss_frame.size(); l++){
-					if (students_all[student_valid[i]][0].miss_frame[l]>start_frame[6] && students_all[student_valid[i]][0].miss_frame[l] < end_frame[6])
-						msf.push_back(students_all[student_valid[i]][0].miss_frame[l]);
-				}
-				string miss_f=" ";
-				for (int l = 0; l < msf.size(); l++){
-					if (l == 0){
-						miss_f = "[";
-					}
-					miss_f += to_string(msf[l]);
-					if (l == msf.size() - 1){
-						miss_f += "]";
-					}
-					else miss_f += ",";
-				}
-
-				string append_string = "(" + start_time[6] + "," + end_time[6] + ")";
-				string append_frame = "(" + to_string(start_frame[6]) + "," + to_string(end_frame[6]) + ")";
-				int a;
-				a = activity_order[6] >= 2 ? activity_order[6] : 2;
-				behavior_infomation["standing"][a - 2] = append_string;
-				behavior_infomation["standing"][a - 1] = append_frame;
-				//----------------------------------------------------		
-				all_rect["standing"][a - 2] = miss_f != " " ? append_frame + "," + miss_f : append_frame;
-				Json::Value student_loc;
-				for (int k = ss[3].x; k <= ss[3].y; k++){		
-					Json::Value student_rect;
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.x);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.y);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.width);
-					student_rect.append(students_all[student_valid[i]][k].body_for_save.height);
-					student_loc.append(student_rect);
-				}
-				all_rect["standing"][a - 1] = Json::Value(student_loc);
+				string dongzuo = "standing";
+				student_Json(students_all, student_valid, i, j, start_time[6], start_frame[6], end_frame[6], activity_order[6], end_time[6], negtive_num, ss[3], behavior_infomation, all_rect, dongzuo);
 			}
-			
-			//-------------------------------------------------
-			/*Json::Value student_rect;
-			student_rect.append(students_all[student_valid[i]][j].body_for_save.x);
-			student_rect.append(students_all[student_valid[i]][j].body_for_save.y);
-			student_rect.append(students_all[student_valid[i]][j].body_for_save.width);
-			student_rect.append(students_all[student_valid[i]][j].body_for_save.height);
-			student_loc.append(student_rect);*/
-			
 		}
 
 		root2["student"].append(behavior_infomation);
 		root3["student"].append(all_rect);
 
-
-		/*if (students_all[student_valid[i]].size() == 1)continue;
-		else{
-			Json::Value student_loc;
-			for (int j = 0; j < 8; j++){
-				Json::Value part_loc;
-				int x = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].x;
-				int y = students_all[student_valid[i]][students_all[student_valid[i]].size() - 1].all_points[j].y;
-				part_loc.append(x);
-				part_loc.append(y);
-				student_loc["Parts'location"].append(part_loc);
-			}
-			root[human[i]] = Json::Value(student_loc);
-		}*/
 	}
 	ofstream out;
 	string jsonfile = output.substr(0,pos1)+"/" +videoname +"-Stu"+ ".json";
