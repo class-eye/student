@@ -153,9 +153,10 @@ bool greate3(Student_Info a, Student_Info b){
 
 //Json::Value root_all;
 
-void class_Json(vector<Class_Info> &class_info_all, int &i, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Json::Value &class_infomation,string &dongzuo){
+void class_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, vector<Class_Info> &class_info_all, int &i, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Json::Value &class_infomation, string &dongzuo){
 	char buff[200];
 	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", class_info_all[i].pstSystemTime.dwYear, class_info_all[i].pstSystemTime.dwMon, class_info_all[i].pstSystemTime.dwDay, class_info_all[i].pstSystemTime.dwHour, class_info_all[i].pstSystemTime.dwMin, class_info_all[i].pstSystemTime.dwSec);
+	
 	if (negtive_num == 10){
 		start_time = buff;
 		start_frame = class_info_all[i].cur_frame;
@@ -165,14 +166,25 @@ void class_Json(vector<Class_Info> &class_info_all, int &i, string &start_time, 
 	if (class_info_all[i].cur_frame - end_frame < 10){
 		end_frame = class_info_all[i].cur_frame;
 		end_time = buff;
+		
+		for (int k = 0; k < student_valid.size(); k++){
+			for (int j = 1; j < students_all[student_valid[k]].size(); j++){
+				if (students_all[student_valid[k]][j].cur_frame1 >= start_frame && students_all[student_valid[k]][j].cur_frame1 <= end_frame){
+					students_all[student_valid[k]][j].bow_head_each = false;
+					students_all[student_valid[k]][j].bow_head = false;
+					students_all[student_valid[k]][j].disscussion = false;
+				}
+			}
+		}
 	}
+	
 	string append_string = "(" + start_time + "," + end_time + ")";
 	string append_frame = "(" + to_string(start_frame) + "," + to_string(end_frame) + ")";
 	int a;
 	a = activity_order >= 2 ? activity_order : 2;
 	class_infomation[dongzuo][a - 2] = append_string;
 	class_infomation[dongzuo][a - 1] = append_frame;
-
+	
 }
 void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Point &ss, Json::Value &behavior_infomation,Json::Value &all_rect,string &dongzuo){
 	
@@ -224,10 +236,14 @@ void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student
 		Json::Value student_rect;
 		auto iter = find(msf.begin(), msf.end(), k);
 		if (iter != msf.end()){
-			student_rect.append(0);
-			student_rect.append(0);
-			student_rect.append(0);
-			student_rect.append(0);
+			//student_rect.append(0);
+			//student_rect.append(0);
+			//student_rect.append(0);
+			//student_rect.append(0);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.x);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.y);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.width);
+			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.height);
 		}
 		else{
 			student_rect.append(students_all[student_valid[i]][count + ss.x].body_for_save.x);
@@ -255,6 +271,13 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 	vector<int>end_frame(7, 0);
 	vector<int>activity_order(7,0);
 
+	string status1 = "Raising hand";
+	string status2 = "Standing";
+	string status3 = "2-Disscussion";
+	string status3back = "4-Disscussion";
+	string status4 = "Dazing";
+	string status5 = "Bow Head";
+
 	Json::Value root1;
 	Json::Value class_infomation;
 	
@@ -274,7 +297,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				if (negtive_num == i)negtive_num = 10;
 			}
 			string dongzuo = "all_bow_head";
-			class_Json(class_info_all, i, start_time[0], start_frame[0], end_frame[0], activity_order[0], end_time[0], negtive_num, class_infomation,dongzuo);
+			class_Json(students_all, student_valid,class_info_all, i, start_time[0], start_frame[0], end_frame[0], activity_order[0], end_time[0], negtive_num, class_infomation, dongzuo);
 
 		}
 		if (class_info_all[i].all_disscussion_2 == true){
@@ -291,7 +314,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				if (negtive_num == i)negtive_num = 10;
 			}
 			string dongzuo = "all_disscussion_2";
-			class_Json(class_info_all, i, start_time[1], start_frame[1], end_frame[1], activity_order[1], end_time[1], negtive_num, class_infomation, dongzuo);
+			class_Json(students_all, student_valid,class_info_all, i, start_time[1], start_frame[1], end_frame[1], activity_order[1], end_time[1], negtive_num, class_infomation, dongzuo);
 
 		}
 		if (class_info_all[i].all_disscussion_4 == true){
@@ -308,11 +331,11 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 				if (negtive_num == i)negtive_num = 10;
 			}
 			string dongzuo = "all_disscussion_4";
-			class_Json(class_info_all, i, start_time[2], start_frame[2], end_frame[2], activity_order[2], end_time[2], negtive_num, class_infomation, dongzuo);
+			class_Json(students_all, student_valid,class_info_all, i, start_time[2], start_frame[2], end_frame[2], activity_order[2], end_time[2], negtive_num, class_infomation, dongzuo);
 		}
 	}
-	root1["class_infomation"] = Json::Value(class_infomation);
 	
+	root1["class_infomation"] = Json::Value(class_infomation);
 	ofstream out1;
 	string jsonfile1 = output.substr(0, pos1) + "/" + videoname+"-Class" + ".json";
 	out1.open(jsonfile1);
@@ -422,8 +445,8 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 
 		root2["student"].append(behavior_infomation);
 		root3["student"].append(all_rect);
-
 	}
+
 	ofstream out;
 	string jsonfile = output.substr(0,pos1)+"/" +videoname +"-Stu"+ ".json";
 	out.open(jsonfile);

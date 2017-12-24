@@ -68,7 +68,7 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &ou
 						students_all[i].push_back(student_ori);					
 						string b = output + "/" + "0.jpg";
 						//cv::circle(frame, student_ori.loc, 3, cv::Scalar(0, 0, 255), -1);
-						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 255, 255), 1);
+						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2);
 						cv::imwrite(b, frame);
 					}
 				}
@@ -111,7 +111,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 						x[j] = 0;
 						y[j] = 0;
 						v = 1;
-						if (j == 0){
+						if (j == 0 || j == 4 || j == 7){
 							v = 0;
 						}
 					}
@@ -129,23 +129,40 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					float angle_l = CalculateVectorAngle(x[5], y[5], x[6], y[6], x[7], y[7]);
 					bool Vertical_l = false;
 					bool Vertical_r = false;
-					if ((y[4] > y[3] && y[3] > y[2]) && (y[7] > y[6] && y[6] > y[5])){
-						float longer_limb = max(abs(y[4] - y[2]), abs(y[7] - y[5]));
-						float shorter_limb = min(abs(y[4] - y[2]), abs(y[7] - y[5]));
-						/*float longer_width = max(abs(x[5] - x[2]), abs(x[7] - x[4]));
-						float shorter_width = min(abs(x[5] - x[2]), abs(x[7] - x[4]));*/
-						//if (shorter_limb / longer_limb > 0.75/* && shorter_width / longer_width > 0.7*/){
-						if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
-							if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135/* && angle_l > 115*/)){
-								Vertical_r = true;
+					if (y[4] != 0 && y[7] != 0){
+						if ((y[4] > y[3] && y[3] > y[2]) && (y[7] > y[6] && y[6] > y[5])){
+							float longer_limb = max(abs(y[4] - y[2]), abs(y[7] - y[5]));
+							float shorter_limb = min(abs(y[4] - y[2]), abs(y[7] - y[5]));
+							/*float longer_width = max(abs(x[5] - x[2]), abs(x[7] - x[4]));
+							float shorter_width = min(abs(x[5] - x[2]), abs(x[7] - x[4]));*/
+							//if (shorter_limb / longer_limb > 0.75/* && shorter_width / longer_width > 0.7*/){
+							if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
+								if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135 && angle_l > 100)){
+									Vertical_r = true;
+								}
+							}
+							if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
+								if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135 && angle_r > 100)){
+									Vertical_l = true;
+								}
 							}
 						}
+					}
+					else if (y[4] == 0 && y[7] != 0){
+						float angle_l = CalculateVectorAngle(x[5], y[5], x[6], y[6], x[7], y[7]);
 						if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
-							if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135/* && angle_r > 115*/)){
+							if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l >=150)){
 								Vertical_l = true;
 							}
 						}
-						//}
+					}
+					else if (y[4] != 0 && y[7] == 0){
+						float angle_r = CalculateVectorAngle(x[2], y[2], x[3], y[3], x[4], y[4]);
+						if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
+							if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r >= 150)){
+								Vertical_r = true;
+							}
+						}
 					}
 					if ((Vertical_r || Vertical_l)){
 						student_info.arm_vertical = true;
