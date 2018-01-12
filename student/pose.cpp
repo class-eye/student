@@ -24,7 +24,7 @@ bool greate(vector<float>a, vector<float>b){
 }
 PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	Timer timer;
-	float scale = 2.3*368.0 / oriImg.size[0];
+	float scale = 2.0*368.0 / oriImg.size[0];
 
 	Mat imagetotest;
 	cv::resize(oriImg, imagetotest, Size(0, 0), scale, scale);
@@ -42,7 +42,9 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 	memcpy(data->mutable_cpu_data() + 2 * bias, bgr[2].data, bytes);
 	/*caffe::Profiler* profiler = caffe::Profiler::Get();
 	profiler->TurnON();*/
+	//LOG(INFO) << "A";
 	net.Forward();
+	//LOG(INFO) << "B";
 	shared_ptr<Blob> output_blobs = net.blob_by_name("Mconv7_stage6_L2");
 	shared_ptr<Blob> output_blobs1 = net.blob_by_name("Mconv7_stage6_L1");
 

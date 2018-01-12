@@ -24,38 +24,38 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 	int num_of_back = 0;
 	int num_of_disscuss = 0;
 	int num_of_bowhead = 0;
-	int offseat_num = 0;
+	
 	for (int j = 0; j < student_valid.size(); j++){
 
 		if (students_all[student_valid[j]][0].cur_size != students_all[student_valid[j]].size()){
 			students_all[student_valid[j]][0].cur_size = students_all[student_valid[j]].size();
-			
+
 			int x2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.x;
 			int y2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y;
 
 			if (students_all[student_valid[j]].size() <= 5){
 				/*for (int k = 1; k < students_all[student_valid[j]].size() - 1; k++){
 					if (students_all[student_valid[j]][k].front == true && students_all[student_valid[j]][k + 1].front == true){
-						line(image, students_all[student_valid[j]][k].loc, students_all[student_valid[j]][k + 1].loc, cv::Scalar(0, 0, 255), 2, 8, 0);
+					line(image, students_all[student_valid[j]][k].loc, students_all[student_valid[j]][k + 1].loc, cv::Scalar(0, 0, 255), 2, 8, 0);
 					}
 					else{
-						line(image, students_all[student_valid[j]][k].neck_loc, students_all[student_valid[j]][k + 1].neck_loc, cv::Scalar(255, 0, 0), 2, 8, 0);
+					line(image, students_all[student_valid[j]][k].neck_loc, students_all[student_valid[j]][k + 1].neck_loc, cv::Scalar(255, 0, 0), 2, 8, 0);
 					}
-				}*/
+					}*/
 			}
 			else{
 				/*int k1 = students_all[student_valid[j]].size() - 5;
 
 				if (students_all[student_valid[j]][k1].front == true && students_all[student_valid[j]][k1 + 1].front == true && students_all[student_valid[j]][k1 + 2].front == true && students_all[student_valid[j]][k1 + 3].front == true && students_all[student_valid[j]][k1 + 4].front == true)
 				{
-					for (int k = students_all[student_valid[j]].size() - 5; k < students_all[student_valid[j]].size() - 1; k++){
-						line(image, students_all[student_valid[j]][k].loc, students_all[student_valid[j]][k + 1].loc, cv::Scalar(0, 0, 255), 2, 8, 0);
-					}
+				for (int k = students_all[student_valid[j]].size() - 5; k < students_all[student_valid[j]].size() - 1; k++){
+				line(image, students_all[student_valid[j]][k].loc, students_all[student_valid[j]][k + 1].loc, cv::Scalar(0, 0, 255), 2, 8, 0);
+				}
 				}
 				else{
-					for (int k = students_all[student_valid[j]].size() - 5; k < students_all[student_valid[j]].size() - 1; k++){
-						line(image, students_all[student_valid[j]][k].neck_loc, students_all[student_valid[j]][k + 1].neck_loc, cv::Scalar(255, 0, 0), 2, 8, 0);
-					}
+				for (int k = students_all[student_valid[j]].size() - 5; k < students_all[student_valid[j]].size() - 1; k++){
+				line(image, students_all[student_valid[j]][k].neck_loc, students_all[student_valid[j]][k + 1].neck_loc, cv::Scalar(255, 0, 0), 2, 8, 0);
+				}
 				}*/
 
 				//-------------------收集5s内的信息---------------------------
@@ -75,23 +75,23 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 				float max_width = (*max_element(box_range.begin(), box_range.end())) * 2 / 3;
 				//------------------判断讨论-----------------------------
 
-				if (num_turn_body < 20){
-					int count1 = 0;
-					if (students_all[student_valid[j]].size() > 10){
-						for (int k = students_all[student_valid[j]].size() - 10; k < students_all[student_valid[j]].size(); k++){
-							if (students_all[student_valid[j]][k].turn_head == true)count1++;
-						}
-					}
-					if (count1 >= 8 || students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].turn_body == true || students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
-						students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion = true;
-					}
-					if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
-						num_of_back++;
-					}
-					if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion == true){
-						num_of_disscuss++;
+				//if (num_turn_body < 20){
+				int count1 = 0;
+				if (students_all[student_valid[j]].size() > 10){
+					for (int k = students_all[student_valid[j]].size() - 10; k < students_all[student_valid[j]].size(); k++){
+						if (students_all[student_valid[j]][k].turn_head == true)count1++;
 					}
 				}
+				if (count1 >= 8 || students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].turn_body == true || students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
+					students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion = true;
+				}
+				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
+					num_of_back++;
+				}
+				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].disscussion == true){
+					num_of_disscuss++;
+				}
+				//}
 
 				//------------------判断低头-----------------------------------
 				int count2 = 0;
@@ -114,7 +114,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 					{
 						students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing = true;
 					}
-				}		
+				}
 				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].standing == true && students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].arm_vertical == true){
 					float dis = abs(students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].loc.y - students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y);
 					if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y < image.size().height / 5)thre1 = 10;
@@ -124,14 +124,14 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 
 				int thre = 4;
 				int cur_y = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y;
-				if (cur_y < 200)thre = 3;			
+				if (cur_y < 200)thre = 3;
 				//-------------------累积能量--------------------------------
 				Point2f pre_loc = students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].loc;
 				Point2f cur_loc = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc;
 				float distance = euDistance(pre_loc, cur_loc);
 				if (distance < thre)students_all[student_valid[j]][0].energy++;
 				else students_all[student_valid[j]][0].energy = 0;
-				if (students_all[student_valid[j]][0].energy>=10)line(image, Point2f(x2, y2), Point2f(x2, y2 - students_all[student_valid[j]][0].energy), cv::Scalar(255, 0, 255), 2, 8, 0);
+				if (students_all[student_valid[j]][0].energy >= 10)line(image, Point2f(x2, y2), Point2f(x2, y2 - students_all[student_valid[j]][0].energy), cv::Scalar(255, 0, 255), 2, 8, 0);
 				//cv::putText(image, to_string(students_all[student_valid[j]][0].energy), cv::Point2f(x2 + 8, y2 - students_all[student_valid[j]][0].energy), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1);
 				if (students_all[student_valid[j]][0].energy > students_all[student_valid[j]][0].max_energy){
 					students_all[student_valid[j]][0].max_energy = students_all[student_valid[j]][0].energy;
@@ -163,13 +163,13 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 					}
 				}
 			}
-			
+
 		}
 		else{
 			students_all[student_valid[j]][0].miss_frame.push_back(n);
 			students_all[student_valid[j]][0].away_from_seat++;
-			offseat_num++;
-			if (offseat_num >= 7 || students_all[student_valid[j]][0].away_from_seat>=15){
+			
+			if (students_all[student_valid[j]][0].away_from_seat >= 15){
 				students_all[student_valid[j]][0].energy = 0;
 				students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head = false;
 				students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head_each = false;
@@ -182,13 +182,13 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 	}//for (int j = 0; j < student_valid.size(); j++) end
 
 	//----------------------------------------群体行为---------------------------------------------
-	if (num_of_back >= 7){
+	if (num_of_back >= 6){
 		class_info.all_disscussion_4 = true;
 	}
-	else if (num_of_disscuss >= 10){
+	else if (num_of_disscuss >= 9){
 		class_info.all_disscussion_2 = true;
 	}
-	if (num_of_bowhead >= 10 && num_of_back<7 && num_of_disscuss<10){
+	if (num_of_bowhead >= 10 && num_of_back<6 && num_of_disscuss<9){
 		class_info.all_bow_head = true;
 		for (int j = 0; j < student_valid.size(); j++){
 			for (int k = 1; k < students_all[student_valid[j]].size(); k++){
@@ -198,12 +198,6 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 				}
 			}
 		}
-	}
-
-	if (offseat_num >= 7){
-		class_info.all_disscussion_4 = false;
-		class_info.all_disscussion_2 = false;
-		class_info.all_bow_head = false;
 	}
 
 	////----------------如果讨论--------------------------
@@ -218,31 +212,37 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 	//	cv::putText(image, status5, cv::Point2f(image.size[1] / 2, 70), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 255), 1);
 	//}
 
-	////--------------------------------个体行为------------------------------------------------
-	//for (int j = 0; j < student_valid.size(); j++){
-	//	int x1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.x;
-	//	int y1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.y;
-	//	//----------------如果发呆----------------------------
-	//	/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze == true){
-	//	cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
-	//	}*/
-	//	//---------------如果起立-----------------------------
-	//	if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
-	//		cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
-	//	}
-	//	//----------------如果低头----------------------------
+	//--------------------------------个体行为------------------------------------------------
+	for (int j = 0; j < student_valid.size(); j++){
+		int x1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.x;
+		int y1 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].neck_loc.y;
+		//----------------如果发呆----------------------------
+		/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].daze == true){
+		cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
+		}*/
+		////---------------如果起立-----------------------------
+		//if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
+		//	cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
+		//}
+		////----------------如果低头----------------------------
 
-	//	if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head_each == true){
-	//		cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
-	//	}
-	//	//-----------------如果举手-----------------------------
-	//	if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
-	//		students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand = false;
-	//	}
-	//	if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
-	//		cv::putText(image, status1, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 0.7);
-	//	}
-	//}
+		//if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head_each == true){
+		//	cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
+		//}
+		//-----------------如果举手-----------------------------
+		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
+			students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand = false;
+		}
+		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
+			int x2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save.x;
+			int y2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save.y - 10;
+			cv::putText(image, to_string(students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].scores), cv::Point2f(x2, y2), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 0.7);
+			cv::rectangle(image, students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save, Scalar(255, 0, 0), 2, 8, 0);
+			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].real_raise == true){
+				cv::rectangle(image, students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save, Scalar(0, 255, 0), 2, 8, 0);
+			}
+		}
+	}
 
 
 

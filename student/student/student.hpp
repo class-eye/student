@@ -3,6 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include <caffe/caffe.hpp>
 #include "pose.hpp"
+#include "hand.hpp"
 #include "Timer.hpp"
 #include "fs.hpp"
 #include "incCn/HCNetSDK.h"  
@@ -44,10 +45,13 @@ struct Student_Info{
 	vector<int>miss_frame;
 	//vector<Point2f>all_points;
 
+	bool real_raise = false;
+	float scores = 0.0;
+
 	PLAYM4_SYSTEM_TIME pstSystemTime;
 };
 //vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime);
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Net &net2, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime);
 void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num);
 
 #endif

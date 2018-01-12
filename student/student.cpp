@@ -23,7 +23,7 @@ vector<vector<Student_Info>>students_all(70);
 int standard_frame = 1;
 //int max_student_num = 0;
 
-void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num){
+void GetStandaredFeats(Net &net1,PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num){
 	if (n%standard_frame == 0){
 		Timer timer;
 		pose_detect(net1, frame, pose);
@@ -76,16 +76,16 @@ void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &ou
 		}
 	}
 }
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime){
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Net &net2, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime){
 	/*vector<Student_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output)*/
 	Timer timer;
 	
 	if (n % standard_frame == 0){
-	
-		/*char buf[300];
-		sprintf(buf, "../tmp/%d.jpg", n);
-		cv::imwrite(buf, image);*/
-		/*Mat image1;
+
+		/*char buf1[100];
+		sprintf(buf1, "/home/data/Class_results/photo/%d.jpg", n);
+		cv::imwrite(buf1, image);
+		Mat image1;
 		image.copyTo(image1);*/
 		timer.Tic();
 		pose_detect(net1, image, pose);
@@ -102,7 +102,8 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 			Student_Info student_info;
 			student_info.cur_frame1 = n;
 			student_info.pstSystemTime = pstSystemTime;
-			int symbol_raise = 0;
+			int symbol_raise_l = 0;
+			int symbol_raise_r = 0;
 			int v = 0;
 			float score = float(pose.subset[i][18]) / pose.subset[i][19];
 			if (pose.subset[i][19] >= 3 && score >= 0.4){
@@ -137,12 +138,12 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 							float shorter_width = min(abs(x[5] - x[2]), abs(x[7] - x[4]));*/
 							//if (shorter_limb / longer_limb > 0.75/* && shorter_width / longer_width > 0.7*/){
 							if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
-								if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135 && angle_l > 100)){
+								if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135 && angle_l > 115)){
 									Vertical_r = true;
 								}
 							}
 							if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
-								if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135 && angle_r > 100)){
+								if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135 && angle_r > 115)){
 									Vertical_l = true;
 								}
 							}
@@ -151,7 +152,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					else if (y[4] == 0 && y[7] != 0){
 						float angle_l = CalculateVectorAngle(x[5], y[5], x[6], y[6], x[7], y[7]);
 						if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
-							if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l >=150)){
+							if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l >= 150)){
 								Vertical_l = true;
 							}
 						}
@@ -174,24 +175,93 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 				if (pose.subset[i][0] != -1){
 					if (pose.subset[i][4] != -1 && pose.subset[i][3] != -1 && pose.subset[i][2] != -1){
 						if (y[4] <= y[3] && y[3] <= y[2] && (y[3] - y[4] > 10)){
-							symbol_raise = 1;
+							symbol_raise_r = 1;
 						}
-						else if (y[2] >= y[4])symbol_raise = 1;
-						else if (y[3] - y[4] >= abs(y[2] - y[4]) * 4)symbol_raise = 1;
+						else if (y[2] >= y[4])symbol_raise_r = 1;
+						else if (y[3] - y[4] >= abs(y[2] - y[4]))symbol_raise_r = 1;
 					}
 					if (pose.subset[i][7] != -1 && pose.subset[i][6] != -1 && pose.subset[i][5] != -1){
 						if (y[7] <= y[6] && y[6] <= y[5] && (y[6] - y[7] > 10)){
-							symbol_raise = 1;
+							symbol_raise_l = 1;
 						}
-						else if (y[5] >= y[7])symbol_raise = 1;
-						else if (y[6] - y[7] >= abs(y[5] - y[7]) * 4)symbol_raise = 1;
+						else if (y[5] >= y[7])symbol_raise_l = 1;
+						else if (y[6] - y[7] >= abs(y[5] - y[7]))symbol_raise_l = 1;
 					}
 				}
 
-
-				if (symbol_raise == 1){    //如果举手
+				Rect train;
+				if (symbol_raise_r || symbol_raise_l){    //如果举手
 					student_info.raising_hand = true;
+
+					if (symbol_raise_r){
+						if (y[4] <= y[3] && y[3] <= y[2] && (y[3] - y[4] > 5)){
+							student_info.real_raise = true;
+							student_info.scores = 1.0;
+						}
+						else{
+							int xg = (x[4] + x[2] + x[3]) / 3;
+							int yg = (y[4] + y[2] + y[3]) / 3;
+							int heightg;
+							int widthg;
+							if (x[1] != 0){
+								widthg = MIN(abs(x[1] - x[3]), abs(x[1] - x[2]));
+							}
+							else widthg = MAX(abs(x[0] - x[3]), abs(x[0] - x[2]));
+							heightg = abs(y[0] - y[3]);
+							if (heightg != 0 && widthg != 0){
+								train.x = xg - widthg;
+								train.y = yg - heightg*1.1;
+								train.height = 1.8* heightg;
+								train.width = train.height *1.2 / 1.78;
+							}
+							refine(train, image);
+							if (train.height > 0 && train.width > 0){
+								Mat img_hand = image(train);
+								std::tuple<bool, float> raiseornot = raise_or_not(net2, img_hand);
+								student_info.real_raise = get<0>(raiseornot);
+								student_info.scores = get<1>(raiseornot);
+							}
+						}
+
+					}
+					else if (symbol_raise_l){
+						if (y[7] <= y[6] && y[6] <= y[5] && (y[6] - y[7] > 5)){
+							student_info.real_raise = true;
+							student_info.scores = 1.0;
+						}
+						else{
+							int xg = (x[5] + x[6] + x[7]) / 3;
+							int yg = (y[5] + y[6] + y[7]) / 3;
+							int heightg;
+							int widthg;
+							if (x[1] != 0){
+								widthg = MIN(abs(x[1] - x[6]), abs(x[1] - x[5]));
+							}
+							else widthg = MAX(abs(x[0] - x[6]), abs(x[0] - x[5]));
+							heightg = abs(y[0] - y[6]);
+							if (heightg != 0 && widthg != 0){
+								train.y = yg - heightg*1.2;
+								train.height = 1.8 * heightg;
+								train.width = train.height *1.2 / 1.78;
+								train.x = xg - train.width / 2;
+							}
+							refine(train, image);
+							if (train.height > 0 && train.width > 0){
+								Mat img_hand = image(train);
+								std::tuple<bool,float> raiseornot = raise_or_not(net2, img_hand);
+								student_info.real_raise = get<0>(raiseornot);
+								student_info.scores = get<1>(raiseornot);
+							}
+						}
+					}
+					/*int min1 = MIN(train.height, train.width);
+					if (min1 >= 30){
+						string opt = output + "/" + to_string(n) + "__" + to_string(i) + ".jpg";
+						Mat im = image(train);
+						imwrite(opt, im);
+					}*/
 				}
+
 				//-----------------判断扭头 判断转身 判断背身（为了讨论）判断低头------------------------------
 
 				if (pose.subset[i][0] != -1 && pose.subset[i][1] != -1 && pose.subset[i][2] != -1 && pose.subset[i][5] != -1){
@@ -250,6 +320,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					rect_for_save.height = 2 * (wid1 + wid2 - 5);
 					if (rect_for_save.height < 5)rect_for_save.height = 15;
 					//cv::rectangle(image, rect_for_save, Scalar(0, 255, 0), 2, 8, 0);
+					refine(rect_for_save, image);
 					student_info.body_for_save = rect_for_save;
 
 					Rect cur_rect;
@@ -316,28 +387,33 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 			} //if (pose.subset[i][19] >= 3 && score >= 0.4) end
 		}//for (int i = 0; i < pose.subset.size(); i++) end
 
-		
+
 		//----------------------分析行为------------------------------
-		Analys_Behavior(students_all, student_valid, class_info_all, image, n, pstSystemTime,num_turn_body);
-		//timer.Tic();
-		writeJson(student_valid, students_all, class_info_all, output, n);	
+
+		Analys_Behavior(students_all, student_valid, class_info_all, image, n, pstSystemTime, num_turn_body);
+		////timer.Tic();
+		if (n % (10) == 0){
+			writeJson(student_valid, students_all, class_info_all, output, n);
+		}
+
+
 		/*timer.Toc();
 		cout << "writeJson cost " << timer.Elasped() / 1000.0 << " s" << endl;*/
 		//drawGrid(image,student_valid,students_all);
 
 		string output1;
-		if (class_info_all.size()>0 && (class_info_all[class_info_all.size() - 1].all_bow_head)){
+		/*if (class_info_all.size()>0 && (class_info_all[class_info_all.size() - 1].all_bow_head)){
 			output1 = output + "/" + to_string(n)+"-bow" + ".jpg";
-		}
-		else if (class_info_all.size() > 0 && class_info_all[class_info_all.size() - 1].all_disscussion_2){
+			}
+			else if (class_info_all.size() > 0 && class_info_all[class_info_all.size() - 1].all_disscussion_2){
 			output1 = output + "/" + to_string(n) + "-dis2" + ".jpg";
-		}
-		else if (class_info_all.size() > 0 && class_info_all[class_info_all.size() - 1].all_disscussion_4){
+			}
+			else if (class_info_all.size() > 0 && class_info_all[class_info_all.size() - 1].all_disscussion_4){
 			output1 = output + "/" + to_string(n) + "-dis4" + ".jpg";
-		}
-		else{
-			output1 = output + "/" + to_string(n) + ".jpg";
-		}
+			}
+			else{*/
+		output1 = output + "/" + to_string(n) + ".jpg";
+		//}
 		//cv::resize(image, image, Size(0, 0), 1 / 2., 1 / 2.);
 		cv::imwrite(output1, image);
 		timer.Toc();

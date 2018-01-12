@@ -177,13 +177,14 @@ void class_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_v
 			}
 		}
 	}
-	
-	string append_string = "(" + start_time + "," + end_time + ")";
-	string append_frame = "(" + to_string(start_frame) + "," + to_string(end_frame) + ")";
-	int a;
-	a = activity_order >= 2 ? activity_order : 2;
-	class_infomation[dongzuo][a - 2] = append_string;
-	class_infomation[dongzuo][a - 1] = append_frame;
+	//if (end_frame - start_frame >= 4){
+		string append_string = "(" + start_time + "," + end_time + ")";
+		string append_frame = "(" + to_string(start_frame) + "," + to_string(end_frame) + ")";
+		int a;
+		a = activity_order >= 2 ? activity_order : 2;
+		class_infomation[dongzuo][a - 2] = append_string;
+		class_infomation[dongzuo][a - 1] = append_frame;
+	//}
 	
 }
 void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Point &ss, Json::Value &behavior_infomation,Json::Value &all_rect,string &dongzuo){
@@ -232,6 +233,7 @@ void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student
 	all_rect[dongzuo][a - 2] = /*miss_f != " " ? append_frame + "," + miss_f : */append_frame;
 	Json::Value student_loc;
 	int count = 0;
+	//for (int k = start_frame; k <= end_frame; k++){
 	for (int k = start_frame; k <= end_frame; k++){
 		Json::Value student_rect;
 		auto iter = find(msf.begin(), msf.end(), k);

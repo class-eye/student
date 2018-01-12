@@ -65,12 +65,14 @@ void yv12toYUV(char *outYuv, char *inYv12, int width, int height, int widthStep)
 #define HIK_HEAD_LEN 40
 
 Net *a;
+Net *b;
 void CALLBACK DecCBFun(int nPort, char * pBuf, int nSize, FRAME_INFO * pFrameInfo, void* nReserved1, int nReserved2)
 {
 	{
 		if (caffe::GPUAvailable()) {
-			caffe::SetMode(caffe::GPU, 1);
+			caffe::SetMode(caffe::GPU, 0);
 		}
+		//caffe::SetMode(caffe::CPU, -1);
 		long lFrameType = pFrameInfo->nType;
 		int frameH = pFrameInfo->nHeight;
 		int frameW = pFrameInfo->nWidth;
@@ -87,13 +89,13 @@ void CALLBACK DecCBFun(int nPort, char * pBuf, int nSize, FRAME_INFO * pFrameInf
 			cvReleaseImage(&pImgYCrCb);
 			cvReleaseImage(&pImg);
 			cv::resize(img, img, Size(0, 0), 2 / 3., 2 / 3.);
-			if (n < 20){
+			if (n < 10 ){
 				PoseInfo pose1;
 				GetStandaredFeats(*a, pose1, img, n, output, max_student_num);
 			}
 			else{
 				PoseInfo pose;
-				student_info = student_detect(*a, img, n, pose, output, pstSystemTime);
+				student_info = student_detect(*a,*b, img, n, pose, output, pstSystemTime);
 				/*vector<vector<Student_Info>>students_all = get<0>(student_info);
 				vector<Class_Info>class_info_all = get<1>(student_info);*/
 			}
@@ -102,7 +104,6 @@ void CALLBACK DecCBFun(int nPort, char * pBuf, int nSize, FRAME_INFO * pFrameInf
 		}
 	}
 	MemPoolClear();
-
 }
 
 int main()
@@ -113,31 +114,42 @@ int main()
 	unsigned char* pBuffer = NULL;
 	int g_nPort = -1;
 
+	//caffe::SetMode(caffe::CPU, -1);
+
 	if (caffe::GPUAvailable()) {
-		caffe::SetMode(caffe::GPU, 1);
+		caffe::SetMode(caffe::GPU, 0);	
 	}
 	Net net1("../models/pose_deploy.prototxt");
 	net1.CopyTrainedLayersFrom("../models/pose_iter_440000.caffemodel");
-	a = &net1;
-	
-	string videodir = "/home/data/jiangbo/xiaoxue/arranged/qian/2th/5-3/22/yingyv2";
-	string resultdir = "/home/data/jiangbo/xiaoxue/arranged/qian/2th/5-3/22/yingyv2";
-	/*string videodir = "/home/lw/student_api/inputvideo";
-	string resultdir = "/home/lw/student_api/output";*/
+	a = &net1;	
+	Net net2("../models/handsnet.prototxt");
+	net2.CopyTrainedLayersFrom("../models/handsnet.caffemodel");
+	b = &net2;
+	string videodir = "/home/lw/student_api/inputvideo";
+	//string videodir = "/home/data/jiangbo/xiaoxue/code1/62";
+	string resultdir = "/home/lw/student_api/output";
+
+	//string videodir = "/home/lw/data/code1/53";
+	//string resultdir = "/home/lw/data/hands";
+
 	if (!fs::IsExists(resultdir)){
 		fs::MakeDir(resultdir);
 	}
-	int i = 0;
+	
+	//int i=0;  //53
+	//int i = 5;   //54
+	//int i=0;   //62
+	int i = 0;  //63
 	vector<string>videolist = fs::ListDir(videodir, { "mp4" });
-	while(i < videolist.size()){
+	while (i < videolist.size()){
 		initValue(n, max_student_num, class_info_all, student_valid, students_all);
 		string videoname = videolist[i];
-		//string videoname = "ditou.mp4";
+		//string videoname = "hiv00128.mp4";
 		output = resultdir + "/" + videoname;
 		if (!fs::IsExists(output)){
 			fs::MakeDir(output);
 		}
-		cout << videoname << endl;
+		cout << videolist.size()<<"  "<<videoname << endl;
 		string videopath = videodir + "/" + videoname;
 		//获取播放库通道号
 		PlayM4_GetPort(&g_nPort);
@@ -171,8 +183,9 @@ int main()
 		PlayM4_SetDecCallBackMend(g_nPort, DecCBFun, NULL);
 		PlayM4_SetDecodeFrameType(g_nPort, 1);
 		PlayM4_Play(g_nPort, NULL);
-
-		//cout<<"************总时间"<<PlayM4_GetFileTime(g_nPort)<<endl;
+	
+		/*cout << "video time: " << PlayM4_GetFileTime(g_nPort) << endl;
+		cout << "video frames: " << PlayM4_GetFileTotalFrames(g_nPort) << endl;*/
 		//bool a=PlayM4_SetCurrentFrameNum(g_nPort, 300);  //从第几帧开始
 		
 		while (!feof(fp))
@@ -198,14 +211,14 @@ int main()
 
 		}
 		//---------------------------------------
-		cout << "**** 停止解码" << endl;
-		PlayM4_Stop(g_nPort);
-		cout << "***关闭流" << endl;
+		cout << "**** stop" << endl;
+		//PlayM4_Stop(g_nPort);
+		
 		//关闭流，回收源数据缓冲
 		PlayM4_CloseStream(g_nPort);
-		cout << "释放播放库端口号" << endl;
+		cout << "***close" << endl;
 		//释放播放库端口号
-		PlayM4_FreePort(g_nPort);
+		//PlayM4_FreePort(g_nPort);
 		cout << "***1" << endl;
 
 		i++;

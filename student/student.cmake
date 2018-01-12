@@ -1,6 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 set(SRC ${CMAKE_CURRENT_LIST_DIR}/student.cpp
-		${CMAKE_CURRENT_LIST_DIR}/pose.cpp  
+		${CMAKE_CURRENT_LIST_DIR}/pose.cpp 
+        ${CMAKE_CURRENT_LIST_DIR}/hand.cpp
 		${CMAKE_CURRENT_LIST_DIR}/fs.cpp  
 		${CMAKE_CURRENT_LIST_DIR}/Timer.cpp 
 		${CMAKE_CURRENT_LIST_DIR}/behavior.cpp  
@@ -10,7 +11,8 @@ set(SRC ${CMAKE_CURRENT_LIST_DIR}/student.cpp
 		${CMAKE_CURRENT_LIST_DIR}/student/student.hpp
 		${CMAKE_CURRENT_LIST_DIR}/student/fs.hpp
 		${CMAKE_CURRENT_LIST_DIR}/student/Timer.hpp
-		${CMAKE_CURRENT_LIST_DIR}/student/pose.hpp)	
+		${CMAKE_CURRENT_LIST_DIR}/student/pose.hpp
+		${CMAKE_CURRENT_LIST_DIR}/student/hand.hpp)	
 set(STUDENT_INCLUDE ${CMAKE_CURRENT_LIST_DIR})
 set(STUDENT_LIBRARY student)
 add_library(student STATIC ${SRC})
