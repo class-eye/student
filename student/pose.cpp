@@ -237,7 +237,38 @@ PoseInfo pose_detect(Net &net,Mat &oriImg,PoseInfo &pose){
 						found += 1;
 					}
 				}
-				
+				if (found == 2){
+					//cout << "found==2" << endl;
+					int j1 = subset_idx[0];
+					int j2 = subset_idx[1];
+					vector<float>subset1 = pose.subset[j1];
+					vector<float>subset2 = pose.subset[j2];
+					for (int k = 0; k < 14; k++){
+						if (subset1[k] >= 0)subset1[k] = 1;
+						else subset1[k] = 0;
+						if (subset2[k] >= 0)subset2[k] = 1;
+						else subset2[k] = 0;
+					}
+					vector<float>membership(14);
+					for (int k = 0; k < 14; k++){
+						membership[k] = subset1[k] + subset2[k];
+					}
+					int num = count(membership.begin(), membership.end(), 2);
+					if (num == 0){
+						for (int k = 0; k < 14; k++){
+							pose.subset[j1][k] = pose.subset[j1][k] + pose.subset[j2][k] + 1;
+						}
+						pose.subset[j1][18] = pose.subset[j1][18] + pose.subset[j2][18];
+						pose.subset[j1][19] = pose.subset[j1][19] + pose.subset[j2][19];
+						pose.subset[j1][19] = pose.subset[j1][19] + connection_all[i][j][2];
+						pose.subset.erase(pose.subset.begin() + j2, pose.subset.begin() + j2 + 1);
+					}
+					else{
+						pose.subset[j1][indexB] = partBs[j];
+						pose.subset[j1][18] += pose.candicate[partBs[j]][2] + connection_all[i][j][2];
+						pose.subset[j1][19] += 1;
+					}
+				}
 				if (found == 1){
 					int idx = subset_idx[0];
 					if (pose.subset[idx][indexB] != partBs[j]){

@@ -96,8 +96,42 @@ bool PtInAnyRect1(Point2f pCur, Rect search)
 		if (x > pCur.x)nCross++;
 	}
 	return (nCross % 2 == 1);
-
 }
+
+bool PtInAnyRect2(Point2f pCur, Point2f pLT, Point2f pRT, Point2f pRB, Point2f pLB)
+{
+	/*Point2f pLT, pRT, pLB, pRB;
+	pLT.x = search.x;
+	pLT.y = search.y;
+	pRT.x = search.x + search.width;
+	pRT.y = search.y;
+	pLB.x = search.x;
+	pLB.y = search.y + search.height;
+	pRB.x = search.x + search.width;
+	pRB.y = search.y + search.height;*/
+
+	//任意四边形有4个顶点
+	std::vector<double> jointPoint2fx;
+	std::vector<double> jointPoint2fy;
+	int nCount = 4;
+	Point2f RectPoint2fs[4] = { pLT, pLB, pRB, pRT };
+	int nCross = 0;
+	for (int i = 0; i < nCount; i++)
+	{
+		Point2f pStart = RectPoint2fs[i];
+		Point2f pEnd = RectPoint2fs[(i + 1) % nCount];
+
+		if (pCur.y < min(pStart.y, pEnd.y) || pCur.y > max(pStart.y, pEnd.y))
+			continue;
+
+		double x = (double)(pCur.y - pStart.y) * (double)(pEnd.x - pStart.x) / (double)(pEnd.y - pStart.y) + pStart.x;
+		if (x > pCur.x)nCross++;
+	}
+	return (nCross % 2 == 1);
+}
+
+
+
 float CalculateVectorAngle(float x1, float y1, float x2, float y2, float x3, float y3)
 {
 	float x_1 = x2 - x1;
@@ -173,6 +207,8 @@ void class_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_v
 					students_all[student_valid[k]][j].bow_head_each = false;
 					students_all[student_valid[k]][j].bow_head = false;
 					students_all[student_valid[k]][j].disscussion = false;
+					students_all[student_valid[k]][j].raising_hand = false;
+					students_all[student_valid[k]][j].standing = false;
 				}
 			}
 		}
@@ -187,25 +223,25 @@ void class_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_v
 	//}
 	
 }
-void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Point &ss, Json::Value &behavior_infomation,Json::Value &all_rect,string &dongzuo){
-	
+void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student_valid, int &i, int &j, string &start_time, int &start_frame, int &end_frame, int &activity_order, string &end_time, int &negtive_num, Point &ss, Json::Value &behavior_infomation, Json::Value &all_rect, string &dongzuo){
+
 	char buff[200];
 	sprintf(buff, "%d/%d/%d-%02d:%02d:%02d", students_all[student_valid[i]][j].pstSystemTime.dwYear, students_all[student_valid[i]][j].pstSystemTime.dwMon, students_all[student_valid[i]][j].pstSystemTime.dwDay, students_all[student_valid[i]][j].pstSystemTime.dwHour, students_all[student_valid[i]][j].pstSystemTime.dwMin, students_all[student_valid[i]][j].pstSystemTime.dwSec);
-	
+
 	if (negtive_num == 3){
 		start_time = buff;
 		start_frame = students_all[student_valid[i]][j].cur_frame1;
 		end_frame = students_all[student_valid[i]][j].cur_frame1;
 		ss.x = j;
 		ss.y = j;
-		activity_order+=2;
+		activity_order += 2;
 	}
-	
-	if (students_all[student_valid[i]][j].cur_frame1 - end_frame <=3){	
-		end_frame = students_all[student_valid[i]][j].cur_frame1;	
+
+	if (students_all[student_valid[i]][j].cur_frame1 - end_frame <= 3){
+		end_frame = students_all[student_valid[i]][j].cur_frame1;
 		ss.y = j;
 		end_time = buff;
-	}	
+	}
 	vector<int>msf;
 	for (int l = 0; l < students_all[student_valid[i]][0].miss_frame.size(); l++){
 		if (students_all[student_valid[i]][0].miss_frame[l]>start_frame && students_all[student_valid[i]][0].miss_frame[l] < end_frame)
@@ -213,22 +249,24 @@ void student_Json(vector<vector<Student_Info>>&students_all, vector<int>&student
 	}
 	/*string miss_f = " ";
 	for (int l = 0; l < msf.size(); l++){
-		if (l == 0){
-			miss_f = "[";
-		}
-		miss_f += to_string(msf[l]);
-		if (l == msf.size() - 1){
-			miss_f += "]";
-		}
-		else miss_f += ",";
+	if (l == 0){
+	miss_f = "[";
+	}
+	miss_f += to_string(msf[l]);
+	if (l == msf.size() - 1){
+	miss_f += "]";
+	}
+	else miss_f += ",";
 	}*/
 	string append_string = "(" + start_time + "," + end_time + ")";
 	string append_frame = "(" + to_string(start_frame) + "," + to_string(end_frame) + ")";
 
 	int a;
-	a = activity_order >= 2 ? activity_order : 2;	
+	a = activity_order >= 2 ? activity_order : 2;
+
 	behavior_infomation[dongzuo][a - 2] = append_frame;
 	behavior_infomation[dongzuo][a - 1] = append_string;
+
 	//----------------------------------------------------
 	all_rect[dongzuo][a - 2] = /*miss_f != " " ? append_frame + "," + miss_f : */append_frame;
 	Json::Value student_loc;
@@ -370,7 +408,7 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 
 		Json::Value all_rect;
 		all_rect["ID"] = student_valid[i];
-		
+	
 		for (int j = 1; j < students_all[student_valid[i]].size(); j++){
 			
 			if (students_all[student_valid[i]][j].bow_head_each == true){
@@ -382,10 +420,10 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 				}
 				else{
-					for (int k = 0; k < j; k++){
+					for (int k = 1; k < j; k++){
 						if (students_all[student_valid[i]][k].bow_head_each == false)negtive_num++;
 					}
-					if (negtive_num == j)negtive_num = 3;
+					if (negtive_num == j-1)negtive_num = 3;
 				}
 				string dongzuo = "bow_head";
 				student_Json(students_all, student_valid, i, j, start_time[3], start_frame[3], end_frame[3], activity_order[3], end_time[3], negtive_num, ss[0], behavior_infomation, all_rect,dongzuo);
@@ -400,28 +438,35 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 				}
 				else{
-					for (int k = 0; k < j; k++){
+					for (int k = 1; k < j; k++){
 						if (students_all[student_valid[i]][k].daze == false)negtive_num++;
 					}
-					if (negtive_num == j)negtive_num = 3;
+					if (negtive_num == j-1)negtive_num = 3;
 				}
 
 				string dongzuo = "daze";
 				student_Json(students_all, student_valid, i, j, start_time[4], start_frame[4], end_frame[4], activity_order[4], end_time[4], negtive_num, ss[1], behavior_infomation, all_rect, dongzuo);
 			}
 		
-			if (students_all[student_valid[i]][j].raising_hand == true){
+			if (students_all[student_valid[i]][j].raising_hand == true && students_all[student_valid[i]][j].real_raise==true){
+				/*if (student_valid[i] == 35){
+					if (students_all[student_valid[i]][j].cur_frame1 == 106){
+						cout << students_all[student_valid[i]][j - 1] .cur_frame1<<" "<< students_all[student_valid[i]][j - 1].raising_hand << " " << students_all[student_valid[i]][j - 1].real_raise << endl;
+						cout << students_all[student_valid[i]][j - 2].cur_frame1 << " " << students_all[student_valid[i]][j - 2].raising_hand << " " << students_all[student_valid[i]][j - 2].real_raise << endl;
+						cout << students_all[student_valid[i]][j - 3].cur_frame1 << " " << students_all[student_valid[i]][j - 3].raising_hand << " " << students_all[student_valid[i]][j - 3].real_raise << endl;
+					}
+				}*/
 				int negtive_num = 0;
 				if (j - 3 > 0){
 					for (int k = j - 3; k < j; k++){
-						if (students_all[student_valid[i]][k].raising_hand == false)negtive_num++;
+						if (students_all[student_valid[i]][k].raising_hand == false || students_all[student_valid[i]][k].real_raise == false)negtive_num++;
 					}
 				}
 				else{
-					for (int k = 0; k < j; k++){
-						if (students_all[student_valid[i]][k].raising_hand == false)negtive_num++;
+					for (int k = 1; k < j; k++){
+						if (students_all[student_valid[i]][k].raising_hand == false || students_all[student_valid[i]][k].real_raise == false)negtive_num++;
 					}
-					if (negtive_num == j)negtive_num = 3;
+					if (negtive_num == j-1)negtive_num = 3;
 				}
 				string dongzuo = "raising_hand";
 				student_Json(students_all, student_valid, i, j, start_time[5], start_frame[5], end_frame[5], activity_order[5], end_time[5], negtive_num, ss[2], behavior_infomation, all_rect, dongzuo);
@@ -435,10 +480,10 @@ void writeJson(vector<int>&student_valid, vector<vector<Student_Info>>&students_
 					}
 				}
 				else{
-					for (int k = 0; k < j; k++){
+					for (int k = 1; k < j; k++){
 						if (students_all[student_valid[i]][k].standing == false)negtive_num++;
 					}
-					if (negtive_num == j)negtive_num = 3;
+					if (negtive_num == j-1)negtive_num = 3;
 				}
 				string dongzuo = "standing";
 				student_Json(students_all, student_valid, i, j, start_time[6], start_frame[6], end_frame[6], activity_order[6], end_time[6], negtive_num, ss[3], behavior_infomation, all_rect, dongzuo);

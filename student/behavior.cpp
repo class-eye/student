@@ -60,16 +60,16 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 
 				//-------------------收集5s内的信息---------------------------
 
-				vector<float>nose_range;
+				//vector<float>nose_range;
 				vector<float>box_range;
 				vector<float>nose_y;
 				for (int k = students_all[student_valid[j]].size() - 5; k < students_all[student_valid[j]].size(); k++){
-					nose_range.push_back(students_all[student_valid[j]][k].loc.x);
-					nose_y.push_back(students_all[student_valid[j]][k].loc.y);
+					//nose_range.push_back(students_all[student_valid[j]][k].loc.x);
+					nose_y.push_back(students_all[student_valid[j]][k].neck_loc.y);
 					box_range.push_back(students_all[student_valid[j]][k].body_bbox.width);
 				}
-				float max_nose = *max_element(nose_range.begin(), nose_range.end());
-				float min_nose = *min_element(nose_range.begin(), nose_range.end());
+				/*float max_nose = *max_element(nose_range.begin(), nose_range.end());
+				float min_nose = *min_element(nose_range.begin(), nose_range.end());*/
 				float max_nose_y = *max_element(nose_y.begin(), nose_y.end());
 
 				float max_width = (*max_element(box_range.begin(), box_range.end())) * 2 / 3;
@@ -109,7 +109,10 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 
 				//-----------------判断起立(3s内)---------------------------
 				float thre1;
-				if (max_nose_y - nose_y[nose_y.size() - 1] > max_width * 4 / 5){
+				
+				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y > image.size().height / 2)thre1 = max_width * 1 / 2;
+				else thre1 = max_width * 9 / 16.;
+				if (max_nose_y - nose_y[nose_y.size() - 1] > thre1){
 					if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].arm_vertical == true)
 					{
 						students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing = true;
@@ -118,7 +121,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 				if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].standing == true && students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].arm_vertical == true){
 					float dis = abs(students_all[student_valid[j]][students_all[student_valid[j]].size() - 2].loc.y - students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y);
 					if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].loc.y < image.size().height / 5)thre1 = 10;
-					else thre1 = max_width * 3 / 4.;
+					else thre1 = max_width * 9 / 16.;
 					if (dis < thre1)students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing = true;
 				}
 
@@ -221,19 +224,20 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 		cv::putText(image, status4, cv::Point2f(x1, y1 + 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
 		}*/
 		////---------------如果起立-----------------------------
-		//if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
-		//	cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
-		//}
+		/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].standing == true){
+			cv::putText(image, status2, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
+			}*/
 		////----------------如果低头----------------------------
 
 		//if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].bow_head_each == true){
 		//	cv::putText(image, status5, cv::Point2f(x1, y1), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
 		//}
 		//-----------------如果举手-----------------------------
+
 		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].back == true){
 			students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand = false;
 		}
-		if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
+		/*if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].raising_hand == true){
 			int x2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save.x;
 			int y2 = students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save.y - 10;
 			cv::putText(image, to_string(students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].scores), cv::Point2f(x2, y2), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 0.7);
@@ -241,7 +245,7 @@ void Analys_Behavior(vector<vector<Student_Info>>&students_all, vector<int>&stud
 			if (students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].real_raise == true){
 				cv::rectangle(image, students_all[student_valid[j]][students_all[student_valid[j]].size() - 1].body_for_save, Scalar(0, 255, 0), 2, 8, 0);
 			}
-		}
+		}*/
 	}
 
 

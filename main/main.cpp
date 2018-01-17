@@ -18,11 +18,13 @@ using namespace cv;
 using namespace caffe;
 using namespace fs;
 
-extern vector<Class_Info>class_info_all;
-extern vector<int>student_valid;
-extern vector<vector<Student_Info>>students_all;
+vector<Class_Info>class_info_all;
+vector<int>student_valid;
+vector<vector<Student_Info>>students_all(70);
 int n = 0;
 int max_student_num = 0;
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_info;
+string output;
 
 void initValue(int &n, int &max_student_num, vector<Class_Info>&class_info_all, vector<int>&student_valid, vector<vector<Student_Info>>&students_all){
 	n = 0;
@@ -33,9 +35,6 @@ void initValue(int &n, int &max_student_num, vector<Class_Info>&class_info_all, 
 	}
 	class_info_all.clear();
 }
-
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_info;
-string output;
 
 void yv12toYUV(char *outYuv, char *inYv12, int width, int height, int widthStep)
 {
@@ -89,13 +88,13 @@ void CALLBACK DecCBFun(int nPort, char * pBuf, int nSize, FRAME_INFO * pFrameInf
 			cvReleaseImage(&pImgYCrCb);
 			cvReleaseImage(&pImg);
 			cv::resize(img, img, Size(0, 0), 2 / 3., 2 / 3.);
-			if (n < 10 ){
+			if (n < 20 /*&& n>14 */){
 				PoseInfo pose1;
-				GetStandaredFeats(*a, pose1, img, n, output, max_student_num);
+				GetStandaredFeats(*a, pose1, img, n, output, max_student_num, students_all, student_valid,  class_info_all);
 			}
-			else{
+			else {
 				PoseInfo pose;
-				student_info = student_detect(*a,*b, img, n, pose, output, pstSystemTime);
+				student_info = student_detect(*a, *b, img, n, pose, output, pstSystemTime,students_all,student_valid,class_info_all);
 				/*vector<vector<Student_Info>>students_all = get<0>(student_info);
 				vector<Class_Info>class_info_all = get<1>(student_info);*/
 			}
@@ -123,13 +122,13 @@ int main()
 	net1.CopyTrainedLayersFrom("../models/pose_iter_440000.caffemodel");
 	a = &net1;	
 	Net net2("../models/handsnet.prototxt");
-	net2.CopyTrainedLayersFrom("../models/handsnet.caffemodel");
+	net2.CopyTrainedLayersFrom("../models/handsnet_iter_12000.caffemodel");
 	b = &net2;
-	string videodir = "/home/lw/student_api/inputvideo";
-	//string videodir = "/home/data/jiangbo/xiaoxue/code1/62";
+	//string videodir = "/home/lw/student_api/inputvideo";
+	//string videodir = "/home/data/jiangbo/xiaoxue/code1/54";
 	string resultdir = "/home/lw/student_api/output";
 
-	//string videodir = "/home/lw/data/code1/53";
+	string videodir = "/home/lw/data/code1/54";
 	//string resultdir = "/home/lw/data/hands";
 
 	if (!fs::IsExists(resultdir)){
@@ -141,10 +140,10 @@ int main()
 	//int i=0;   //62
 	int i = 0;  //63
 	vector<string>videolist = fs::ListDir(videodir, { "mp4" });
-	while (i < videolist.size()){
+	while (i < 1){
 		initValue(n, max_student_num, class_info_all, student_valid, students_all);
-		string videoname = videolist[i];
-		//string videoname = "hiv00128.mp4";
+		//string videoname = videolist[i];
+		string videoname = "54_english_0916_6_1.mp4";
 		output = resultdir + "/" + videoname;
 		if (!fs::IsExists(output)){
 			fs::MakeDir(output);

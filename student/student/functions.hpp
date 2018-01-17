@@ -8,6 +8,7 @@ using namespace cv;
 void refine(Rect& bbox, cv::Mat& img);
 float PointToLineDis(Point2f cur, Point2f start, Point2f end);
 bool PtInAnyRect1(Point2f pCur, Rect search);
+bool PtInAnyRect2(Point2f pCur, Point2f pLT, Point2f pRT, Point2f pRB, Point2f pLB);
 float CalculateVectorAngle(float x1, float y1, float x2, float y2, float x3, float y3);
 int cosDistance(const cv::Mat q, const cv::Mat r, float& distance);
 float euDistance(Point2f q, Point2f r);

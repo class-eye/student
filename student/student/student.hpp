@@ -51,7 +51,7 @@ struct Student_Info{
 	PLAYM4_SYSTEM_TIME pstSystemTime;
 };
 //vector<Student_Info> student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output);
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Net &net2, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime);
-void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num);
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Net &net2, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime, vector<vector<Student_Info>>&students_all, vector<int>&student_valid, vector<Class_Info> &class_info_all);
+void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num, vector<vector<Student_Info>>&students_all, vector<int>&student_valid,vector<Class_Info>&class_info_all);
 
 #endif

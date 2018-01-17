@@ -31,7 +31,7 @@ std::tuple<bool,float>raise_or_not(Net &net, Mat &oriImg){
 	net.Forward();
 	shared_ptr<Blob> probs = net.blob_by_name("prob");
 	float scores = probs->data_at(0, 1, 0, 0);
-	if (scores >= 0.35){
+	if (scores >= 0.32){
 		return std::make_tuple(true,scores);
 	}
 	else return std::make_tuple(false, scores);

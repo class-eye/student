@@ -17,23 +17,33 @@
 using namespace cv;
 using namespace std;
 using namespace caffe;
-vector<Class_Info>class_info_all;
-vector<int>student_valid;
-vector<vector<Student_Info>>students_all(70);
+//vector<Class_Info>class_info_all;
+//vector<int>student_valid;
+//vector<vector<Student_Info>>students_all(70);
 int standard_frame = 1;
-//int max_student_num = 0;
 
-void GetStandaredFeats(Net &net1,PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num){
+
+void GetStandaredFeats(Net &net1, PoseInfo &pose, Mat &frame, int &n, string &output, int &max_student_num, vector<vector<Student_Info>>&students_all, vector<int>&student_valid, vector<Class_Info>&class_info_all){
 	if (n%standard_frame == 0){
+		string origin_output = "../inputimg/"+to_string(n)+".jpg";
+		imwrite(origin_output, frame);
+
 		Timer timer;
 		pose_detect(net1, frame, pose);
-		if (pose.subset.size() > max_student_num){
+		/*int stu_n = 0;
+		for (int i = 0; i < pose.subset.size(); i++){
+			float score = float(pose.subset[i][18]) / pose.subset[i][19];
+			if (pose.subset[i][19] >= 3 && score >= 0.4){
+				stu_n++;
+			}
+		}*/
+		if (pose.subset.size() >= max_student_num){
 			max_student_num = pose.subset.size();
 			cout << pose.subset.size() << endl;
 			student_valid.clear();
 			for (int i = 0; i < 70; i++){
 				students_all[i].clear();
-			}		
+			}
 			for (int i = 0; i < pose.subset.size(); i++){
 				float score = float(pose.subset[i][18]) / pose.subset[i][19];
 				if (pose.subset[i][19] >= 3 && score >= 0.4){
@@ -42,20 +52,20 @@ void GetStandaredFeats(Net &net1,PoseInfo &pose, Mat &frame, int &n, string &out
 						float wid2 = abs(pose.candicate[pose.subset[i][1]][0] - pose.candicate[pose.subset[i][5]][0]);
 						float wid = MAX(wid1, wid2);
 						if (wid == 0)continue;
-						
+
 						Rect standard_rect;
 						standard_rect.x = pose.candicate[pose.subset[i][1]][0] - wid - 5;
-						standard_rect.y = pose.candicate[pose.subset[i][1]][1];
+						standard_rect.y = pose.candicate[pose.subset[i][1]][1] - 10;
 						standard_rect.width = wid1 + wid2 + 10;
-						standard_rect.height = wid1 + wid2-15;
+						standard_rect.height = wid1 + wid2;
 						if (standard_rect.height < 5)standard_rect.height = 15;
 						refine(standard_rect, frame);
 						//cv::rectangle(frame, standard_rect, Scalar(0, 0, 255), 2, 8, 0);
-					
+
 						Student_Info student_ori;
 						student_ori.body_bbox = standard_rect;
 						student_ori.neck_loc = Point2f(pose.candicate[pose.subset[i][1]][0], pose.candicate[pose.subset[i][1]][1]);
-		
+
 						if (pose.subset[i][0] != -1){
 							student_ori.loc = Point2f(pose.candicate[pose.subset[i][0]][0], pose.candicate[pose.subset[i][0]][1]);
 							student_ori.front = true;
@@ -65,7 +75,7 @@ void GetStandaredFeats(Net &net1,PoseInfo &pose, Mat &frame, int &n, string &out
 							student_ori.front = false;
 						}
 						student_valid.push_back(i);
-						students_all[i].push_back(student_ori);					
+						students_all[i].push_back(student_ori);
 						string b = output + "/" + "0.jpg";
 						//cv::circle(frame, student_ori.loc, 3, cv::Scalar(0, 0, 255), -1);
 						cv::putText(frame, to_string(i), student_ori.loc, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2);
@@ -76,12 +86,13 @@ void GetStandaredFeats(Net &net1,PoseInfo &pose, Mat &frame, int &n, string &out
 		}
 	}
 }
-std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Net &net2, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime){
+std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &net1, Net &net2, Mat &image, int &n, PoseInfo &pose, string &output, PLAYM4_SYSTEM_TIME &pstSystemTime, vector<vector<Student_Info>>&students_all, vector<int>&student_valid, vector<Class_Info> &class_info_all){
 	/*vector<Student_Info>student_detect(Net &net1, Mat &image, int &n, PoseInfo &pose,string &output)*/
 	Timer timer;
 	
 	if (n % standard_frame == 0){
-
+		string origin_output = "../inputimg/" + to_string(n) + ".jpg";
+		imwrite(origin_output, image);
 		/*char buf1[100];
 		sprintf(buf1, "/home/data/Class_results/photo/%d.jpg", n);
 		cv::imwrite(buf1, image);
@@ -95,8 +106,13 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 		int color[18][3] = { { 255, 0, 0 }, { 255, 85, 0 }, { 255, 0, 0 }, { 0, 255, 0 }, { 0, 0, 255 }, { 255, 0, 0 }, { 0, 255, 0 }, { 0, 0, 255 }, { 0, 255, 170 }, { 0, 255, 255 }, { 0, 170, 255 }, { 0, 255, 170 }, { 0, 255, 255 }, { 0, 170, 255 }, { 170, 0, 255 }, { 170, 0, 255 }, { 255, 0, 170 }, { 255, 0, 170 } };
 		int x[18];
 		int y[18];
-
 		int num_turn_body = 0;
+
+		int area1 = 0, area2 = 0, area3 = 0;
+		vector<Point2f>area1_ = { { 283, 432 }, { 848, 432 }, { 1080, 709 }, { 0, 706 } };
+		vector<Point2f>area2_ = { { 423, 347 }, { 769, 347 }, { 842,432 }, { 288, 432 } };
+		vector<Point2f>area3_ = { { 489, 308 }, { 730, 308 }, { 772, 347 }, { 427, 347 } };
+		
 
 		for (int i = 0; i < pose.subset.size(); i++){
 			Student_Info student_info;
@@ -123,6 +139,39 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					//student_info.all_points.push_back(Point2f(x[j], y[j]));
 				}
 
+				//---------------------------------------------------------------------
+				/*int dis = 0;
+				if (y[1] != 0){
+					if (y[3] != 0){
+						dis = abs(y[3] - y[1]);
+					}
+					else if (y[6] != 0){
+						dis = abs(y[6] - y[1]);
+					}
+					else {
+						if (y[1] < image.size().height / 2)dis = 20;
+						else dis = 30;
+					}
+				}
+				Point2f cur(x[1],y[1]+dis);
+				if (PtInAnyRect2(cur, area1_[0], area1_[1], area1_[2], area1_[3])){
+					circle(image,cur,3,Scalar(255,0,0),-1);
+					area1++;
+				}
+				if (PtInAnyRect2(cur, area2_[0], area2_[1], area2_[2], area2_[3])){
+					circle(image, cur, 3, Scalar(0, 255, 0), -1);
+					area2++;
+				}
+
+				if (PtInAnyRect2(cur, area3_[0], area3_[1], area3_[2], area3_[3])){
+					circle(image, cur, 3, Scalar(0, 255, 255), -1);
+					area3++;
+				}*/
+				//------------------------------------------------------------------------
+
+				
+
+
 				//-----------判断双手垂直（为了站立）--------------------
 
 				if (v == 0){
@@ -137,31 +186,35 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 							/*float longer_width = max(abs(x[5] - x[2]), abs(x[7] - x[4]));
 							float shorter_width = min(abs(x[5] - x[2]), abs(x[7] - x[4]));*/
 							//if (shorter_limb / longer_limb > 0.75/* && shorter_width / longer_width > 0.7*/){
-							if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
-								if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r > 135 && angle_l > 115)){
+							if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3]) && abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
+								if (/*float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && */(angle_r > 135 && angle_l > 115) || (angle_l > 135 && angle_r > 115)){
 									Vertical_r = true;
 								}
 							}
+							//if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
+							//	if (/*float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && */(angle_l > 135 && angle_r > 115)){
+							//		Vertical_l = true;
+							//	}
+							//}
+						}
+					}
+					else if (y[4] == 0 && y[7] != 0){
+						if (y[7] > y[6] && y[6] > y[5]){
+							float angle_l = CalculateVectorAngle(x[5], y[5], x[6], y[6], x[7], y[7]);
 							if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
-								if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l > 135 && angle_r > 115)){
+								if (/*float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && */(angle_l >= 145)){
 									Vertical_l = true;
 								}
 							}
 						}
 					}
-					else if (y[4] == 0 && y[7] != 0){
-						float angle_l = CalculateVectorAngle(x[5], y[5], x[6], y[6], x[7], y[7]);
-						if (abs(y[7] - y[6]) >= abs(x[7] - x[6]) && abs(y[6] - y[5]) >= abs(x[6] - x[5])){
-							if (float(y[7] - y[6]) / float(y[6] - y[5]) > 0.7 && (angle_l >= 150)){
-								Vertical_l = true;
-							}
-						}
-					}
 					else if (y[4] != 0 && y[7] == 0){
-						float angle_r = CalculateVectorAngle(x[2], y[2], x[3], y[3], x[4], y[4]);
-						if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
-							if (float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && (angle_r >= 150)){
-								Vertical_r = true;
+						if (y[4] > y[3] && y[3] > y[2]){
+							float angle_r = CalculateVectorAngle(x[2], y[2], x[3], y[3], x[4], y[4]);
+							if (abs(y[4] - y[3]) >= abs(x[4] - x[3]) && abs(y[2] - y[3]) >= abs(x[2] - x[3])){
+								if (/*float(y[4] - y[3]) / float(y[3] - y[2]) > 0.7 && */(angle_r >= 145)){
+									Vertical_r = true;
+								}
 							}
 						}
 					}
@@ -172,7 +225,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 				}
 
 				//----------------判断举手-----------------------------
-				if (pose.subset[i][0] != -1){
+				if (pose.subset[i][0] != -1 || pose.subset[i][1] != -1){
 					if (pose.subset[i][4] != -1 && pose.subset[i][3] != -1 && pose.subset[i][2] != -1){
 						if (y[4] <= y[3] && y[3] <= y[2] && (y[3] - y[4] > 10)){
 							symbol_raise_r = 1;
@@ -194,6 +247,7 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					student_info.raising_hand = true;
 
 					if (symbol_raise_r){
+						
 						if (y[4] <= y[3] && y[3] <= y[2] && (y[3] - y[4] > 5)){
 							student_info.real_raise = true;
 							student_info.scores = 1.0;
@@ -206,8 +260,9 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 							if (x[1] != 0){
 								widthg = MIN(abs(x[1] - x[3]), abs(x[1] - x[2]));
 							}
-							else widthg = MAX(abs(x[0] - x[3]), abs(x[0] - x[2]));
-							heightg = abs(y[0] - y[3]);
+							else { widthg = MAX(abs(x[0] - x[3]), abs(x[0] - x[2])); };
+							if (x[0]!=0)heightg = abs(y[0] - y[3]);
+							else heightg = abs(y[1] - y[3] + 10);
 							if (heightg != 0 && widthg != 0){
 								train.x = xg - widthg;
 								train.y = yg - heightg*1.1;
@@ -222,9 +277,21 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 								student_info.scores = get<1>(raiseornot);
 							}
 						}
+						if (y[0] > image.size().height / 2){
+							if (y[0] >= y[4]){
+								student_info.real_raise = true;
+								student_info.scores = 1.0;
+							}
+						}
+						else{
+							if (y[0] - y[4] > 3){
+								student_info.real_raise = true;
+								student_info.scores = 1.0;
+							}
+						}
 
 					}
-					else if (symbol_raise_l){
+					if (symbol_raise_l && student_info.real_raise==false){
 						if (y[7] <= y[6] && y[6] <= y[5] && (y[6] - y[7] > 5)){
 							student_info.real_raise = true;
 							student_info.scores = 1.0;
@@ -238,7 +305,9 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 								widthg = MIN(abs(x[1] - x[6]), abs(x[1] - x[5]));
 							}
 							else widthg = MAX(abs(x[0] - x[6]), abs(x[0] - x[5]));
-							heightg = abs(y[0] - y[6]);
+							if (x[0] != 0)heightg = abs(y[0] - y[6]);
+							else heightg = abs(y[1] - y[6] + 10);
+							
 							if (heightg != 0 && widthg != 0){
 								train.y = yg - heightg*1.2;
 								train.height = 1.8 * heightg;
@@ -253,13 +322,26 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 								student_info.scores = get<1>(raiseornot);
 							}
 						}
+						if (y[0] > image.size().height / 2){
+							if (y[0] >= y[7]){
+								student_info.real_raise = true;
+								student_info.scores = 1.0;
+							}
+						}
+						else{
+							if (y[0] - y[7] > 3){
+								student_info.real_raise = true;
+								student_info.scores = 1.0;
+							}
+						}
 					}
-					/*int min1 = MIN(train.height, train.width);
-					if (min1 >= 30){
-						string opt = output + "/" + to_string(n) + "__" + to_string(i) + ".jpg";
-						Mat im = image(train);
-						imwrite(opt, im);
-					}*/
+					//int min1 = MIN(train.height, train.width);
+					////if (min1 >= 30){
+					//	//string opt = output + "/" + to_string(n) + "__" + to_string(i) + ".jpg";
+					//	string opt = "/home/lw/student_api/output_hand/"  + to_string(n) + "__" + to_string(i) + ".jpg";
+					//	Mat im = image(train);
+					//	imwrite(opt, im);
+					////}
 				}
 
 				//-----------------判断扭头 判断转身 判断背身（为了讨论）判断低头------------------------------
@@ -322,19 +404,21 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 					//cv::rectangle(image, rect_for_save, Scalar(0, 255, 0), 2, 8, 0);
 					refine(rect_for_save, image);
 					student_info.body_for_save = rect_for_save;
-
+					int thr = 0;
+					if (y[1] < image.size().height / 3)thr = 30;
+					else thr = 40;
 					Rect cur_rect;
 					if (student_info.arm_vertical){
 						cur_rect.x = x[1] - wid - 5;
 						cur_rect.y = y[1];
 						cur_rect.width = wid1 + wid2 + 10;
-						cur_rect.height = wid1 + wid2 - 15 + 40;
+						cur_rect.height = wid1 + wid2 - 15 + thr;
 					}
 					else{
 						cur_rect.x = x[1] - wid;
 						cur_rect.y = y[1];
 						cur_rect.width = wid1 + wid2;
-						cur_rect.height = wid1 + wid2 - 15;
+						cur_rect.height = wid1 + wid2 - 8;
 						if (cur_rect.height < 5)cur_rect.height = 15;
 					}
 					refine(cur_rect, image);
@@ -387,6 +471,23 @@ std::tuple<vector<vector<Student_Info>>, vector<Class_Info>>student_detect(Net &
 			} //if (pose.subset[i][19] >= 3 && score >= 0.4) end
 		}//for (int i = 0; i < pose.subset.size(); i++) end
 
+		//----------------------------------------------------------------------------------------------------------------
+		/*for (int i = 0; i < 4; i++){
+			if (i < 3){
+				line(image, area1_[i], area1_[i + 1], cv::Scalar(255, 0, 0), 2);
+				line(image, area2_[i], area2_[i + 1], cv::Scalar(0, 255, 0), 2);
+				line(image, area3_[i], area3_[i + 1], cv::Scalar(0, 255, 255), 2);
+			}
+			else{
+				line(image, area1_[3], area1_[0], cv::Scalar(255, 0, 0), 2);
+				line(image, area2_[3], area2_[0], cv::Scalar(0, 255, 0), 2);
+				line(image, area3_[3], area3_[0], cv::Scalar(0, 255, 255), 2);
+			}
+		}	
+		cv::putText(image, to_string(area1), Point((area1_[0].x + area1_[1].x) / 2, (area1_[0].y + area1_[3].y) / 2), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255),2);
+		cv::putText(image, to_string(area2), Point((area2_[0].x + area2_[1].x) / 2, (area2_[0].y + area2_[3].y) / 2), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255),2);
+		cv::putText(image, to_string(area3), Point((area3_[0].x + area3_[1].x) / 2, (area3_[0].y + area3_[3].y) / 2), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255),2);
+*/
 
 		//----------------------分析行为------------------------------
 
